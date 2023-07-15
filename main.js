@@ -4,7 +4,6 @@ import { Vector2 } from './engine/types.js';
 import { Box, Circle, Poly } from './engine/physics.js';
 import { getJSON } from './engine/utils.js';
 
-
 const Engine = TGE.Engine;
 
 // Function to create the player
@@ -18,7 +17,7 @@ const createPlayer = () => {
   const circlePlayer = new Circle(new Vector2(0, 0), 100);
   player.colliders.add(circlePlayer);
   player.attachKeyboard();
-  player.setCollisionResponse('WorldDynamic', TGE.Enum_HitTestMode.Overlap);
+  player.setCollisionResponse('Player', TGE.Enum_HitTestMode.Overlap);
 
 
   return player;
@@ -27,6 +26,7 @@ const createPlayer = () => {
 // Function to create a ghost enemy
 const createGhost = (position) => {
   const ghost = Engine.addActor('enemy', {
+    name: 'ghost',
     hasColliders: true,
     imgUrl: 'img/ghost.png',
     scale: 0.2,
@@ -43,6 +43,7 @@ const createGhost = (position) => {
 // Function to create an obstacle
 const createObstacle = (position) => {
   const obstacle = Engine.addActor('obstacle', {
+    name: 'obstacle',
     hasColliders: true,
     imgUrl: 'img/block.png',
     scale: 1,
@@ -53,18 +54,14 @@ const createObstacle = (position) => {
   const boxObstacle = new Box(new Vector2(0, 0), new Vector2(50, 50));
   obstacle.colliders.add(boxObstacle);
   obstacle.setCollisionResponse('Obstacle', TGE.Enum_HitTestMode.Overlap);
-  obstacle.events.add('beginoverlap', e => {
-    // do something when player overlaps
-    // the event object contains reference to both parties of the overlap
-    console.log('WallTouch');
-  });
 
   return obstacle;
 };
 
 // Function to create a pellet
 const createPellet = (position) => {
-  const pellet = Engine.addActor('enemy', {
+  const pellet = Engine.addActor('consumable', {
+    name: 'pellet',
     hasColliders: true,
     imgUrl: 'img/pellet.png',
     scale: 0.05,
@@ -74,18 +71,28 @@ const createPellet = (position) => {
   // Create collision circle for the pellet
   const circlePellet = new Circle(new Vector2(0, 0), 10);
   pellet.colliders.add(circlePellet);
-  pellet.setCollisionResponse('Enemy', TGE.Enum_HitTestMode.Overlap);
+  pellet.setCollisionResponseFlag({
+    Consumable: TGE.Enum_HitTestMode.Ignore,
+    Enemy: TGE.Enum_HitTestMode.Ignore,
+    Player: TGE.Enum_HitTestMode.Overlap,
+    Obstacle: TGE.Enum_HitTestMode.Ignore
+  });
   pellet.events.add('beginoverlap', e => {
     // Remove the pellet when the player overlaps with it
     pellet.destroy();
     console.log('Pellet collected');
   });
-
   return pellet;
 };
 
 
-const tick = (player, enemy) => {
+const tick = () => {
+  const player = Engine.gameLoop.players[0];
+  const ghost = Engine.gameLoop.findActorByName('ghost')
+  const obstacle = Engine.gameLoop.findActorByName('obstacle')
+  const pellet = Engine.gameLoop.findActorByName('pellet')
+
+
   Engine.renderingSurface.resetTransform();
   Engine.renderingSurface.clear();
 
@@ -98,14 +105,19 @@ const tick = (player, enemy) => {
 
   // TODO: Implement game logic here
   // Check for overlap between player and enemy
-  if (player.overlapsWith(enemy)) {
+  if (player.overlapsWith(ghost)) {
     console.log('DEAD!');
-    // Perform actions or logic when there is an overlap
-  }
+    // Perform actions or logic when there is an overlap 
+  };
 
-
-  // TODO: Render the game entities
+  if (player.overlapsWith(obstacle)) {
+    console.log('WALL!');
+    // Perform actions or logic when there is an overlap 
+  };
 };
+
+// TODO: Render the game entities
+
 
 
 const main = async () => {
@@ -156,7 +168,7 @@ const main = async () => {
 
 
   // Start the game loop
-  Engine.start(() => tick(player, ghost1));
+  Engine.start(tick);
 };
 
 // Initialize the TGE engine and start the main function

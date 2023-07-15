@@ -15,7 +15,8 @@ const createPlayer = () => {
     scale: 0.2,
     position: new Vector2(150, 300),
   });
-
+  const circlePlayer = new Circle(new Vector2(0, 0), 100);
+  player.colliders.add(circlePlayer);
   player.attachKeyboard();
   player.setCollisionResponse('WorldDynamic', TGE.Enum_HitTestMode.Overlap);
 
@@ -32,8 +33,9 @@ const createGhost = (position) => {
     position: position,
   });
 
+  const circleGhost = new Circle(new Vector2(0, 0), 100);
+  ghost.colliders.add(circleGhost);
   ghost.setCollisionResponse('Enemy', TGE.Enum_HitTestMode.Overlap);
-
 
   return ghost;
 };
@@ -151,13 +153,6 @@ const main = async () => {
       }
     }
   }
-
-  // Define collision shapes for player and enemy actors
-  const circlePlayer = new Circle(new Vector2(0, 0), 100);
-  const circleGhost = new Circle(new Vector2(0, 0), 100);
-
-  player.colliders.add(circlePlayer);
-  ghost1.colliders.add(circleGhost);
 
 
   // Start the game loop

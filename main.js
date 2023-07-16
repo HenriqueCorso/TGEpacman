@@ -17,9 +17,10 @@ const createPlayer = () => {
   const circlePlayer = new Circle(new Vector2(0, 0), 100);
   player.colliders.add(circlePlayer);
   player.attachKeyboard();
-  player.setCollisionResponse('Player', TGE.Enum_HitTestMode.Overlap);
-
-
+  player.setCollisionResponse('Obstacle', TGE.Enum_HitTestMode.Overlap);
+  // player.events.add('beginoverlap', e => {
+  //  console.log('playerWALL');
+  // })
   return player;
 };
 
@@ -37,11 +38,18 @@ const createGhost = (position) => {
   ghost.colliders.add(circleGhost);
   ghost.setCollisionResponse('Enemy', TGE.Enum_HitTestMode.Overlap);
 
+  // Set the ghost velocity
+
+  ghost.speed = 1; // Adjust the speed value as desired
+
   return ghost;
 };
 
+
 // Function to create an obstacle
 const createObstacle = (position) => {
+  const player = Engine.gameLoop.players[0];
+
   const obstacle = Engine.addActor('obstacle', {
     name: 'obstacle',
     hasColliders: true,
@@ -51,10 +59,21 @@ const createObstacle = (position) => {
   });
 
   // Create collision box for the obstacle
-  const boxObstacle = new Box(new Vector2(0, 0), new Vector2(50, 50));
+  const boxObstacle = new Box(new Vector2(0, 0), new Vector2(45, 45));
   obstacle.colliders.add(boxObstacle);
-  obstacle.setCollisionResponse('Obstacle', TGE.Enum_HitTestMode.Overlap);
-
+  obstacle.colliderType = 'Obstacle';
+  obstacle.setCollisionResponseFlag({
+    Consumable: TGE.Enum_HitTestMode.Ignore,
+    Enemy: TGE.Enum_HitTestMode.Ignore,
+    Player: TGE.Enum_HitTestMode.Overlap,
+    Obstacle: TGE.Enum_HitTestMode.Ignore
+  });
+  obstacle.events.add('beginoverlap', e => {
+    player.velocity = new Vector2(0, 0);
+    console.log('Obstacle Wall')
+    // do something when player overlaps
+    // the event object contains reference to both parties of the overlap
+  });
   return obstacle;
 };
 
@@ -71,6 +90,7 @@ const createPellet = (position) => {
   // Create collision circle for the pellet
   const circlePellet = new Circle(new Vector2(0, 0), 10);
   pellet.colliders.add(circlePellet);
+  pellet.colliderType = 'Consumable';
   pellet.setCollisionResponseFlag({
     Consumable: TGE.Enum_HitTestMode.Ignore,
     Enemy: TGE.Enum_HitTestMode.Ignore,
@@ -86,15 +106,60 @@ const createPellet = (position) => {
 };
 
 
+// Function to move an actor to the specified position
+const moveActorToPosition = (actor, position) => {
+  actor.position = position;
+};
+
+
+// Function to get the valid neighboring positions for the ghost
+const getValidNeighboringPositions = (position, map) => {
+  const tileSize = 50;
+  const row = Math.round(position.y / tileSize);
+  const col = Math.round(position.x / tileSize);
+  const neighboringPositions = [];
+
+  // Check the neighboring tiles for zeros
+  if (row > 0 && map[row - 1][col] === 0) {
+    neighboringPositions.push(new Vector2(col * tileSize, (row - 1) * tileSize));
+  }
+  if (row < map.length - 1 && map[row + 1][col] === 0) {
+    neighboringPositions.push(new Vector2(col * tileSize, (row + 1) * tileSize));
+  }
+  if (col > 0 && map[row][col - 1] === 0) {
+    neighboringPositions.push(new Vector2((col - 1) * tileSize, row * tileSize));
+  }
+  if (col < map[row].length - 1 && map[row][col + 1] === 0) {
+    neighboringPositions.push(new Vector2((col + 1) * tileSize, row * tileSize));
+  }
+
+  return neighboringPositions;
+};
+
+// Function to get a random valid position connected to the current position
+const getRandomValidPositionConnectedToCurrent = (currentPosition, map) => {
+  const validPositions = getValidNeighboringPositions(currentPosition, map);
+
+  if (validPositions.length === 0) {
+    return null; // No valid positions available
+  }
+
+  const randomIndex = Math.floor(Math.random() * validPositions.length);
+  return validPositions[randomIndex];
+};
+
+const map = await getJSON('./map.hjson');
+
 const tick = () => {
   const player = Engine.gameLoop.players[0];
-  const ghost = Engine.gameLoop.findActorByName('ghost')
-  const obstacle = Engine.gameLoop.findActorByName('obstacle')
-  const pellet = Engine.gameLoop.findActorByName('pellet')
 
+  const ghost = Engine.gameLoop.findActorByName('ghost');
+  const obstacle = Engine.gameLoop.findActorByName('obstacle');
+  const pellet = Engine.gameLoop.findActorByName('pellet');
 
   Engine.renderingSurface.resetTransform();
   Engine.renderingSurface.clear();
+
 
   // Update player's position based on user input
   const keys = player.controllers['keyboard'].keyState;
@@ -103,6 +168,12 @@ const tick = () => {
   if (keys.up) player.position.y -= 2;
   if (keys.down) player.position.y += 2;
 
+
+  // Move the ghost between connected zeros
+  const validNeighborPosition = getRandomValidPositionConnectedToCurrent(ghost.position, map);
+  if (validNeighborPosition) {
+    moveActorToPosition(ghost, validNeighborPosition, ghost.speed);
+  }
   // TODO: Implement game logic here
   // Check for overlap between player and enemy
   if (player.overlapsWith(ghost)) {
@@ -110,15 +181,8 @@ const tick = () => {
     // Perform actions or logic when there is an overlap 
   };
 
-  if (player.overlapsWith(obstacle)) {
-    console.log('WALL!');
-    // Perform actions or logic when there is an overlap 
-  };
+  // TODO: Render the game entities
 };
-
-// TODO: Render the game entities
-
-
 
 const main = async () => {
 
@@ -138,7 +202,6 @@ const main = async () => {
   const ghost1 = createGhost(new Vector2(350, 300));
 
   // Create the obstacles
-  const map = await getJSON('./map.hjson');
 
   // Create the obstacles based on the map
   const obstacles = [];

@@ -18,9 +18,7 @@ const createPlayer = () => {
   player.colliders.add(circlePlayer);
   player.attachKeyboard();
   player.setCollisionResponse('Obstacle', TGE.Enum_HitTestMode.Overlap);
-  // player.events.add('beginoverlap', e => {
-  //  console.log('playerWALL');
-  // })
+
   return player;
 };
 
@@ -36,15 +34,20 @@ const createGhost = (position) => {
 
   const circleGhost = new Circle(new Vector2(0, 0), 100);
   ghost.colliders.add(circleGhost);
-  ghost.setCollisionResponse('Enemy', TGE.Enum_HitTestMode.Overlap);
-
-  // Set the ghost velocity
-
-  ghost.speed = 1; // Adjust the speed value as desired
-
+  ghost.colliderType = 'Enemy';
+  ghost.setCollisionResponseFlag({
+    Consumable: TGE.Enum_HitTestMode.Ignore,
+    Enemy: TGE.Enum_HitTestMode.Ignore,
+    Player: TGE.Enum_HitTestMode.Overlap,
+    Obstacle: TGE.Enum_HitTestMode.Ignore
+  });
+  ghost.events.add('beginoverlap', e => {
+    console.log('DEAD!')
+    // do something when player overlaps
+    // the event object contains reference to both parties of the overlap
+  });
   return ghost;
 };
-
 
 // Function to create an obstacle
 const createObstacle = (position) => {
@@ -70,9 +73,8 @@ const createObstacle = (position) => {
   });
   obstacle.events.add('beginoverlap', e => {
     player.velocity = new Vector2(0, 0);
+
     console.log('Obstacle Wall')
-    // do something when player overlaps
-    // the event object contains reference to both parties of the overlap
   });
   return obstacle;
 };
@@ -105,12 +107,43 @@ const createPellet = (position) => {
   return pellet;
 };
 
+// Function to get the closest valid position that is not occupied by an obstacle
+const getValidPosition = (position, map) => {
+  const tileSize = 50;
+  const row = Math.round(position.y / tileSize);
+  const col = Math.round(position.x / tileSize);
+
+  if (map[row][col] === 0) {
+    return position; // The position is already valid
+  }
+
+  // Find the closest valid position
+  let closestDistance = Infinity;
+  let closestPosition = position;
+
+  for (let r = 0; r < map.length; r++) {
+    for (let c = 0; c < map[r].length; c++) {
+      if (map[r][c] === 0) {
+        const tileX = c * tileSize;
+        const tileY = r * tileSize;
+        const distance = Math.sqrt((position.x - tileX) ** 2 + (position.y - tileY) ** 2);
+
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestPosition = new Vector2(tileX, tileY);
+        }
+      }
+    }
+  }
+
+  return closestPosition;
+};
+
 
 // Function to move an actor to the specified position
 const moveActorToPosition = (actor, position) => {
   actor.position = position;
 };
-
 
 // Function to get the valid neighboring positions for the ghost
 const getValidNeighboringPositions = (position, map) => {
@@ -147,8 +180,13 @@ const getRandomValidPositionConnectedToCurrent = (currentPosition, map) => {
   const randomIndex = Math.floor(Math.random() * validPositions.length);
   return validPositions[randomIndex];
 };
-
-const map = await getJSON('./map.hjson');
+const moveEnemy = () => {
+  const ghost = Engine.gameLoop.findActorByName('ghost');
+  const validNeighborPosition = getRandomValidPositionConnectedToCurrent(ghost.position, map);
+  if (validNeighborPosition) {
+    moveActorToPosition(ghost, validNeighborPosition);
+  }
+};
 
 const tick = () => {
   const player = Engine.gameLoop.players[0];
@@ -160,29 +198,34 @@ const tick = () => {
   Engine.renderingSurface.resetTransform();
   Engine.renderingSurface.clear();
 
-
-  // Update player's position based on user input
   const keys = player.controllers['keyboard'].keyState;
-  if (keys.left) player.position.x -= 2;
-  if (keys.right) player.position.x += 2;
-  if (keys.up) player.position.y -= 2;
-  if (keys.down) player.position.y += 2;
-
-
-  // Move the ghost between connected zeros
-  const validNeighborPosition = getRandomValidPositionConnectedToCurrent(ghost.position, map);
-  if (validNeighborPosition) {
-    moveActorToPosition(ghost, validNeighborPosition, ghost.speed);
+  if (keys.left) {
+    const newPosition = new Vector2(player.position.x - 2, player.position.y);
+    const validPosition = getValidPosition(newPosition, map);
+    moveActorToPosition(player, validPosition);
   }
+  if (keys.right) {
+    const newPosition = new Vector2(player.position.x + 2, player.position.y);
+    const validPosition = getValidPosition(newPosition, map);
+    moveActorToPosition(player, validPosition);
+  }
+  if (keys.up) {
+    const newPosition = new Vector2(player.position.x, player.position.y - 2);
+    const validPosition = getValidPosition(newPosition, map);
+    moveActorToPosition(player, validPosition);
+  }
+  if (keys.down) {
+    const newPosition = new Vector2(player.position.x, player.position.y + 2);
+    const validPosition = getValidPosition(newPosition, map);
+    moveActorToPosition(player, validPosition);
+  }
+
   // TODO: Implement game logic here
-  // Check for overlap between player and enemy
-  if (player.overlapsWith(ghost)) {
-    console.log('DEAD!');
-    // Perform actions or logic when there is an overlap 
-  };
 
   // TODO: Render the game entities
 };
+
+const map = await getJSON('./map.hjson');
 
 const main = async () => {
 
@@ -200,8 +243,7 @@ const main = async () => {
 
   // Create the enemies (ghosts)
   const ghost1 = createGhost(new Vector2(350, 300));
-
-  // Create the obstacles
+  const ghost2 = createGhost(new Vector2(350, 300));
 
   // Create the obstacles based on the map
   const obstacles = [];
@@ -229,9 +271,9 @@ const main = async () => {
     }
   }
 
-
   // Start the game loop
   Engine.start(tick);
+  setInterval(moveEnemy, 500); // Move enemy every 500 milliseconds
 };
 
 // Initialize the TGE engine and start the main function

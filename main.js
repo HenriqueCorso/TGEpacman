@@ -19,7 +19,6 @@ const createPlayer = () => {
   player.movement.acceleration = 0;
   player.movementType = Enum_PlayerMovement.None;
 
-
   player.colliders.add(circlePlayer);
   player.attachKeyboard();
 
@@ -205,25 +204,22 @@ const movePlayer = () => {
     const targetY = targetRow * tileSize;
     const targetPosition = new Vector2(targetX, targetY);
     moveActorToPosition(player, targetPosition);
-    setTimeout(() => {
-      player.isMoving = false;
-    }, 150);
   }
 };
 
+
 const tick = () => {
   const player = Engine.gameLoop.players[0];
-
-
-  const ghost = Engine.gameLoop.findActorByName('ghost');
-  const obstacle = Engine.gameLoop.findActorByName('obstacle');
-  const pellet = Engine.gameLoop.findActorByName('pellet');
+  //const ghost = Engine.gameLoop.findActorByName('ghost');
+  //const obstacle = Engine.gameLoop.findActorByName('obstacle');
+  //const pellet = Engine.gameLoop.findActorByName('pellet');
 
   Engine.renderingSurface.resetTransform();
   Engine.renderingSurface.clear();
 
   // Update player's position based on user input
   movePlayer();
+  if (Engine.gameLoop.tickCount % 10 == 0) { player.isMoving = false; }
 
 
   // TODO: Implement game logic here

@@ -3,6 +3,7 @@ import * as TGE from './engine/engine.js';
 import { Vector2 } from './engine/types.js';
 import { Box, Circle, Poly } from './engine/physics.js';
 import { getJSON } from './engine/utils.js';
+import { Player, Enum_PlayerMovement } from './engine/player.js';
 
 const Engine = TGE.Engine;
 
@@ -15,10 +16,17 @@ const createPlayer = () => {
     position: new Vector2(150, 300),
   });
   const circlePlayer = new Circle(new Vector2(0, 0), 100);
+  player.movement.acceleration = 0;
+  player.movementType = Enum_PlayerMovement.None;
+
+
   player.colliders.add(circlePlayer);
   player.attachKeyboard();
-  player.setCollisionResponse('Obstacle', TGE.Enum_HitTestMode.Overlap);
 
+  player.setCollisionResponse('Obstacle', TGE.Enum_HitTestMode.Overlap);
+  // player.events.add('beginoverlap', e => {
+  //  console.log('playerWALL');
+  // })
   return player;
 };
 
@@ -107,43 +115,12 @@ const createPellet = (position) => {
   return pellet;
 };
 
-// Function to get the closest valid position that is not occupied by an obstacle
-const getValidPosition = (position, map) => {
-  const tileSize = 50;
-  const row = Math.round(position.y / tileSize);
-  const col = Math.round(position.x / tileSize);
-
-  if (map[row][col] === 0) {
-    return position; // The position is already valid
-  }
-
-  // Find the closest valid position
-  let closestDistance = Infinity;
-  let closestPosition = position;
-
-  for (let r = 0; r < map.length; r++) {
-    for (let c = 0; c < map[r].length; c++) {
-      if (map[r][c] === 0) {
-        const tileX = c * tileSize;
-        const tileY = r * tileSize;
-        const distance = Math.sqrt((position.x - tileX) ** 2 + (position.y - tileY) ** 2);
-
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestPosition = new Vector2(tileX, tileY);
-        }
-      }
-    }
-  }
-
-  return closestPosition;
-};
-
 
 // Function to move an actor to the specified position
 const moveActorToPosition = (actor, position) => {
   actor.position = position;
 };
+
 
 // Function to get the valid neighboring positions for the ghost
 const getValidNeighboringPositions = (position, map) => {
@@ -169,7 +146,7 @@ const getValidNeighboringPositions = (position, map) => {
   return neighboringPositions;
 };
 
-// Function to get a random valid position connected to the current position
+/// Function to get a random valid position connected to the current position
 const getRandomValidPositionConnectedToCurrent = (currentPosition, map) => {
   const validPositions = getValidNeighboringPositions(currentPosition, map);
 
@@ -180,6 +157,7 @@ const getRandomValidPositionConnectedToCurrent = (currentPosition, map) => {
   const randomIndex = Math.floor(Math.random() * validPositions.length);
   return validPositions[randomIndex];
 };
+
 const moveEnemy = () => {
   const ghost = Engine.gameLoop.findActorByName('ghost');
   const validNeighborPosition = getRandomValidPositionConnectedToCurrent(ghost.position, map);
@@ -188,8 +166,54 @@ const moveEnemy = () => {
   }
 };
 
+const movePlayer = () => {
+  const player = Engine.gameLoop.players[0];
+  const keys = player.controllers['keyboard'].keyState;
+  const tileSize = 50;
+  const row = Math.round(player.position.y / tileSize);
+  const col = Math.round(player.position.x / tileSize);
+
+  // Check if player is already moving
+  if (player.isMoving) {
+    return;
+  }
+
+  let targetRow = row;
+  let targetCol = col;
+
+  // Move left
+  if (keys.left && col > 0) {
+    targetCol = col - 1;
+  }
+  // Move right
+  if (keys.right && col < map[row].length - 1) {
+    targetCol = col + 1;
+  }
+  // Move up
+  if (keys.up && row > 0) {
+    targetRow = row - 1;
+  }
+  // Move down
+  if (keys.down && row < map.length - 1) {
+    targetRow = row + 1;
+  }
+
+  // Check if the target position is a valid tile (zero on the map)
+  if (map[targetRow][targetCol] === 0) {
+    player.isMoving = true;
+    const targetX = targetCol * tileSize;
+    const targetY = targetRow * tileSize;
+    const targetPosition = new Vector2(targetX, targetY);
+    moveActorToPosition(player, targetPosition);
+    setTimeout(() => {
+      player.isMoving = false;
+    }, 150);
+  }
+};
+
 const tick = () => {
   const player = Engine.gameLoop.players[0];
+
 
   const ghost = Engine.gameLoop.findActorByName('ghost');
   const obstacle = Engine.gameLoop.findActorByName('obstacle');
@@ -198,34 +222,23 @@ const tick = () => {
   Engine.renderingSurface.resetTransform();
   Engine.renderingSurface.clear();
 
-  const keys = player.controllers['keyboard'].keyState;
-  if (keys.left) {
-    const newPosition = new Vector2(player.position.x - 2, player.position.y);
-    const validPosition = getValidPosition(newPosition, map);
-    moveActorToPosition(player, validPosition);
-  }
-  if (keys.right) {
-    const newPosition = new Vector2(player.position.x + 2, player.position.y);
-    const validPosition = getValidPosition(newPosition, map);
-    moveActorToPosition(player, validPosition);
-  }
-  if (keys.up) {
-    const newPosition = new Vector2(player.position.x, player.position.y - 2);
-    const validPosition = getValidPosition(newPosition, map);
-    moveActorToPosition(player, validPosition);
-  }
-  if (keys.down) {
-    const newPosition = new Vector2(player.position.x, player.position.y + 2);
-    const validPosition = getValidPosition(newPosition, map);
-    moveActorToPosition(player, validPosition);
-  }
+  // Update player's position based on user input
+  movePlayer();
+
 
   // TODO: Implement game logic here
+
+  // Check for overlap between player and enemy
+  //if (player.overlapsWith(ghost)) {
+  // console.log('DEAD!');
+  // Perform actions or logic when there is an overlap 
+  //};
 
   // TODO: Render the game entities
 };
 
 const map = await getJSON('./map.hjson');
+
 
 const main = async () => {
 
@@ -244,6 +257,8 @@ const main = async () => {
   // Create the enemies (ghosts)
   const ghost1 = createGhost(new Vector2(350, 300));
   const ghost2 = createGhost(new Vector2(350, 300));
+
+  // Create the obstacles
 
   // Create the obstacles based on the map
   const obstacles = [];
@@ -271,9 +286,11 @@ const main = async () => {
     }
   }
 
+
   // Start the game loop
   Engine.start(tick);
-  setInterval(moveEnemy, 500); // Move enemy every 500 milliseconds
+  Engine.gameLoop.addTimer({ duration: 30, repeat: Infinity, onRepeat: moveEnemy });
+
 };
 
 // Initialize the TGE engine and start the main function

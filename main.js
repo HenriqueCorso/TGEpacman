@@ -53,6 +53,8 @@ const createGhost = (position) => {
     // do something when player overlaps
     // the event object contains reference to both parties of the overlap
   });
+
+  ghost.data.randomDirection = 0
   return ghost;
 };
 
@@ -141,17 +143,17 @@ const moveEnemy = () => {
 
     // Choose a random valid direction
     const randomDirectionIndex = Math.floor(Math.random() * validDirections.length);
-    const randomDirection = validDirections[randomDirectionIndex];
+    ghost.data.randomDirection = validDirections[randomDirectionIndex];
 
     // Move ghost in the chosen direction
-    if (randomDirection === 1) {
-      ghost.position.x -= tileSize;
-    } else if (randomDirection === 2) {
-      ghost.position.x += tileSize;
-    } else if (randomDirection === 3) {
-      ghost.position.y -= tileSize;
-    } else if (randomDirection === 4) {
-      ghost.position.y += tileSize;
+    if (ghost.data.randomDirection === 1) {
+      ghost.position.x -= 1;
+    } else if (ghost.data.randomDirection === 2) {
+      ghost.position.x += 1;
+    } else if (ghost.data.randomDirection === 3) {
+      ghost.position.y -= 1;
+    } else if (ghost.data.randomDirection === 4) {
+      ghost.position.y += 1;
     }
   }
 };
@@ -209,6 +211,9 @@ const tick = () => {
 
   // Update player's position based on user input
   movePlayer();
+
+  // update ghost
+  moveEnemy();
   // TODO: Implement game logic here
 
   // Check for overlap between player and enemy
@@ -272,7 +277,6 @@ const main = async () => {
 
   // Start the game loop
   Engine.start(tick);
-  Engine.gameLoop.addTimer({ duration: 30, repeat: Infinity, onRepeat: moveEnemy });
 
 };
 

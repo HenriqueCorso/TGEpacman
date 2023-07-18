@@ -1,6 +1,6 @@
 // Import necessary modules from TGE
 import * as TGE from './engine/engine.js';
-import { Vector2 } from './engine/types.js';
+import { Vector2 as Vec2, V2 } from './engine/types.js';
 import { Box, Circle, Poly } from './engine/physics.js';
 import { getJSON } from './engine/utils.js';
 import { Player, Enum_PlayerMovement } from './engine/player.js';
@@ -13,9 +13,9 @@ const createPlayer = () => {
     hasColliders: true,
     imgUrl: 'img/pacman.jpg',
     scale: 0.2,
-    position: new Vector2(150, 300),
+    position: V2(150, 300),
   });
-  const circlePlayer = new Circle(new Vector2(0, 0), 100);
+  const circlePlayer = new Circle(V2(0, 0), 100);
   player.movement.acceleration = 0;
   player.movementType = Enum_PlayerMovement.None;
 
@@ -39,7 +39,7 @@ const createGhost = (position) => {
     position: position,
   });
 
-  const circleGhost = new Circle(new Vector2(0, 0), 100);
+  const circleGhost = new Circle(V2(0, 0), 100);
   ghost.colliders.add(circleGhost);
   ghost.colliderType = 'Enemy';
   ghost.setCollisionResponseFlag({
@@ -69,7 +69,7 @@ const createObstacle = (position) => {
   });
 
   // Create collision box for the obstacle
-  const boxObstacle = new Box(new Vector2(0, 0), new Vector2(45, 45));
+  const boxObstacle = new Box(V2(0, 0), V2(45, 45));
   obstacle.colliders.add(boxObstacle);
   obstacle.colliderType = 'Obstacle';
   obstacle.setCollisionResponseFlag({
@@ -79,7 +79,7 @@ const createObstacle = (position) => {
     Obstacle: TGE.Enum_HitTestMode.Ignore
   });
   obstacle.events.add('beginoverlap', e => {
-    player.velocity = new Vector2(0, 0);
+    player.velocity = V2(0, 0);
 
     console.log('Obstacle Wall')
   });
@@ -97,7 +97,7 @@ const createPellet = (position) => {
   });
 
   // Create collision circle for the pellet
-  const circlePellet = new Circle(new Vector2(0, 0), 10);
+  const circlePellet = new Circle(V2(0, 0), 10);
   pellet.colliders.add(circlePellet);
   pellet.colliderType = 'Consumable';
   pellet.setCollisionResponseFlag({
@@ -115,96 +115,86 @@ const createPellet = (position) => {
 };
 
 
-// Function to move an actor to the specified position
-const moveActorToPosition = (actor, position) => {
-  actor.position = position;
-};
-
-
-// Function to get the valid neighboring positions for the ghost
-const getValidNeighboringPositions = (position, map) => {
-  const tileSize = 50;
-  const row = Math.round(position.y / tileSize);
-  const col = Math.round(position.x / tileSize);
-  const neighboringPositions = [];
-
-  // Check the neighboring tiles for zeros
-  if (row > 0 && map[row - 1][col] === 0) {
-    neighboringPositions.push(new Vector2(col * tileSize, (row - 1) * tileSize));
-  }
-  if (row < map.length - 1 && map[row + 1][col] === 0) {
-    neighboringPositions.push(new Vector2(col * tileSize, (row + 1) * tileSize));
-  }
-  if (col > 0 && map[row][col - 1] === 0) {
-    neighboringPositions.push(new Vector2((col - 1) * tileSize, row * tileSize));
-  }
-  if (col < map[row].length - 1 && map[row][col + 1] === 0) {
-    neighboringPositions.push(new Vector2((col + 1) * tileSize, row * tileSize));
-  }
-
-  return neighboringPositions;
-};
-
-/// Function to get a random valid position connected to the current position
-const getRandomValidPositionConnectedToCurrent = (currentPosition, map) => {
-  const validPositions = getValidNeighboringPositions(currentPosition, map);
-
-  if (validPositions.length === 0) {
-    return null; // No valid positions available
-  }
-
-  const randomIndex = Math.floor(Math.random() * validPositions.length);
-  return validPositions[randomIndex];
-};
-
 const moveEnemy = () => {
   const ghost = Engine.gameLoop.findActorByName('ghost');
-  const validNeighborPosition = getRandomValidPositionConnectedToCurrent(ghost.position, map);
-  if (validNeighborPosition) {
-    moveActorToPosition(ghost, validNeighborPosition);
+  const tileSize = 50;
+
+  // Check if ghost is in the middle of a tile
+  const isGhostMiddleOfTile = ((ghost.position.x % tileSize === 0) && (ghost.position.y % tileSize === 0));
+
+  // Rule #1 ghost is allowed to change direction only when it's in the middle of a tile
+  if (isGhostMiddleOfTile) {
+    const validDirections = [];
+
+    // Check if the tile to the left is free
+    if (isTileFree(ghost.position, V2(-1, 0), tileSize)) { validDirections.push(1) }; // Add direction "left"
+
+    // Check if the tile to the right is free
+    if (isTileFree(ghost.position, V2(1, 0), tileSize)) { validDirections.push(2) }; // Add direction "right"
+
+    // Check if the tile above is free
+    if (isTileFree(ghost.position, V2(0, -1), tileSize)) { validDirections.push(3) }; // Add direction "up"
+
+    // Check if the tile below is free
+    if (isTileFree(ghost.position, V2(0, 1), tileSize)) { validDirections.push(4) }; // Add direction "down"
+
+
+    // Choose a random valid direction
+    const randomDirectionIndex = Math.floor(Math.random() * validDirections.length);
+    const randomDirection = validDirections[randomDirectionIndex];
+
+    // Move ghost in the chosen direction
+    if (randomDirection === 1) {
+      ghost.position.x -= tileSize;
+    } else if (randomDirection === 2) {
+      ghost.position.x += tileSize;
+    } else if (randomDirection === 3) {
+      ghost.position.y -= tileSize;
+    } else if (randomDirection === 4) {
+      ghost.position.y += tileSize;
+    }
   }
 };
+
+
+const isTileFree = (pos, offset, tileSize) => {
+  // if player moving down or right , add the width and height of the player to the coordinates - which is the same as tileSize - to verify a hit right or below
+  if (offset.x == 1 || offset.y == 1) {
+    const mapPos = Vec2.Add(Vec2.ToInt(Vec2.DivScalar(pos, tileSize)), offset);
+    return map[mapPos.y][mapPos.x] === 0;
+  }
+  // otherwiswe deduct the pixels of movemnent direction from the current position (to verify a hit aboce of left) 
+  const mapPos = Vec2.ToInt(Vec2.DivScalar(Vec2.Add(pos, offset), tileSize));
+  return map[mapPos.y][mapPos.x] === 0;
+}
 
 const movePlayer = () => {
   const player = Engine.gameLoop.players[0];
   const keys = player.controllers['keyboard'].keyState;
   const tileSize = 50;
-  const row = Math.round(player.position.y / tileSize);
-  const col = Math.round(player.position.x / tileSize);
 
-  // Check if player is already moving
-  if (player.isMoving) {
-    return;
-  }
+  //check if player is exactly dead center over a tile (because that's the only situation when he's allowed to change directions!) otherwise he could be going partially over a block
+  const isPlayerMiddleOfTile = ((player.position.x % tileSize == 0) && (player.position.y % tileSize == 0));
 
-  let targetRow = row;
-  let targetCol = col;
+  //Rule #1 player is allowed to change direction only whne he's in the middle of a tile (this rule can be further refined)
+  if (isPlayerMiddleOfTile) {
+    if (keys.left && player.position.y % 50 == 0) player.data.desiredDirection = 1;
+    if (keys.right && player.position.y % 50 == 0) player.data.desiredDirection = 2;
+    if (keys.up && player.position.x % 50 == 0) player.data.desiredDirection = 3;
+    if (keys.down && player.position.x % 50 == 0) player.data.desiredDirection = 4;
+  }
+  // save a copy of player's current position to se if rule #2 will result in player movement
+  let oldPos = player.position.clone();
 
-  // Move left
-  if (keys.left && col > 0) {
-    targetCol = col - 1;
-  }
-  // Move right
-  if (keys.right && col < map[row].length - 1) {
-    targetCol = col + 1;
-  }
-  // Move up
-  if (keys.up && row > 0) {
-    targetRow = row - 1;
-  }
-  // Move down
-  if (keys.down && row < map.length - 1) {
-    targetRow = row + 1;
-  }
+  // Rule #2 move player to desired direction if the tile in the direction of movement is free
+  if (player.data.desiredDirection == 1 && isTileFree(player.position, V2(-1, 0), tileSize)) player.position.x--;
+  if (player.data.desiredDirection == 2 && isTileFree(player.position, V2(1, 0), tileSize)) player.position.x++;
+  if (player.data.desiredDirection == 3 && isTileFree(player.position, V2(0, -1), tileSize)) player.position.y--;
+  if (player.data.desiredDirection == 4 && isTileFree(player.position, V2(0, 1), tileSize)) player.position.y++;
 
-  // Check if the target position is a valid tile (zero on the map)
-  if (map[targetRow][targetCol] === 0) {
-    player.isMoving = true;
-    const targetX = targetCol * tileSize;
-    const targetY = targetRow * tileSize;
-    const targetPosition = new Vector2(targetX, targetY);
-    moveActorToPosition(player, targetPosition);
-  }
+
+  // Rule #3 if player did not move in any direction dureng last frame, it has hit a block and thus not allowed to continue movemnt
+  if (Vec2.IsEqual(oldPos, player.position, 0.5)) player.data.desiredDirection = -1
 };
 
 
@@ -219,9 +209,6 @@ const tick = () => {
 
   // Update player's position based on user input
   movePlayer();
-  if (Engine.gameLoop.tickCount % 10 == 0) { player.isMoving = false; }
-
-
   // TODO: Implement game logic here
 
   // Check for overlap between player and enemy
@@ -251,8 +238,8 @@ const main = async () => {
   const player = createPlayer();
 
   // Create the enemies (ghosts)
-  const ghost1 = createGhost(new Vector2(350, 300));
-  const ghost2 = createGhost(new Vector2(350, 300));
+  const ghost1 = createGhost(V2(350, 300));
+  const ghost2 = createGhost(V2(350, 300));
 
   // Create the obstacles
 
@@ -263,7 +250,7 @@ const main = async () => {
       if (map[row][col] === 1) {
         const obstacleX = col * 50;
         const obstacleY = row * 50;
-        const obstacle = createObstacle(new Vector2(obstacleX, obstacleY));
+        const obstacle = createObstacle(V2(obstacleX, obstacleY));
         obstacles.push(obstacle);
       }
     }
@@ -276,7 +263,7 @@ const main = async () => {
       if (map[row][col] === 0) {
         const pelletX = col * 50; // Center X position of the pellet
         const pelletY = row * 50; // Center Y position of the pellet
-        const pellet = createPellet(new Vector2(pelletX, pelletY));
+        const pellet = createPellet(V2(pelletX, pelletY));
         pellets.push(pellet);
       }
     }

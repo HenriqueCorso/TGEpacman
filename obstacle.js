@@ -11,7 +11,7 @@ class Obstacle extends Actor {
       owner: Engine.gameLoop,
       hasColliders: true,
       imgUrl: 'img/block.png',
-      scale: 1,
+      scale: 1.2,
       position: position
     });
 
@@ -31,8 +31,6 @@ class Obstacle extends Actor {
     });
   }
 }
-
-
 
 export { Obstacle };
 

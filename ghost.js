@@ -60,11 +60,27 @@ class Ghost extends Enemy {
       // Check if the tile below is free
       if (isTileFree(this.position, V2(0, 1), tileSize)) { validDirections.push(4) }; // Add direction "down"
 
+      // Choose a direction to move
+      let chosenDirection;
 
-      // Choose a random valid direction
-      const randomDirectionIndex = Math.floor(Math.random() * validDirections.length);
-      this.data.randomDirection = validDirections[randomDirectionIndex];
+      // Check if there is only one valid direction
+      if (validDirections.length === 1) {
+        chosenDirection = validDirections[0];
+      } else {
+        // Check if moving forward in the current direction is a valid option
+        if (this.data.randomDirection && validDirections.includes(this.data.randomDirection)) {
+          chosenDirection = this.data.randomDirection;
+        } else {
+          // Choose a random valid direction
+          const randomDirectionIndex = Math.floor(Math.random() * validDirections.length);
+          chosenDirection = validDirections[randomDirectionIndex];
+        }
+      }
+
+      // Update the random direction for future movements
+      this.data.randomDirection = chosenDirection;
     }
+
     // Move ghost in the chosen direction
     if (this.data.randomDirection === 1) {
       this.position.x -= 1;

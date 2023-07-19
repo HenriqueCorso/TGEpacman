@@ -3,13 +3,13 @@
     clearColor:'#111'
     edgeAction:'wrap-around'
     allowedKeys: { F11:true, F12:true }
-    GUI: 'canvas'
+ 
 
     flags:{ 
         hasEdges:false
         hasRenderingSurface:true
         hasWorld:false 
-        hasUI:true        
+    
         developmentMode:false
     }
 

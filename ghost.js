@@ -19,7 +19,6 @@ class Ghost extends Enemy {
       position: position
     });
 
-
     const circleGhost = new Circle(V2(0, 0), 100);
     this.colliders.add(circleGhost);
     this.colliderType = 'Enemy';
@@ -30,12 +29,12 @@ class Ghost extends Enemy {
       Obstacle: TGE.Enum_HitTestMode.Ignore
     });
     this.events.add('beginoverlap', e => {
-      console.log('DEAD!')
+      console.log('DEAD!');
       // do something when player overlaps
       // the event object contains reference to both parties of the overlap
     });
 
-    this.data.randomDirection = 0
+    this.data.randomDirection = 0;
     this.data.previousDirection = 0;
   }
 
@@ -69,15 +68,74 @@ class Ghost extends Enemy {
     this.data.randomDirection = validDirections[randomDirectionIndex];
   }
 
+  checkValidDirectionsTowardsPlayer() {
+    const player = Engine.gameLoop.findActorByName('pacman');
+    const playerPosition = player.position;
+
+    const validDirectionsTowardsPlayer = [];
+    const tileSize = 50;
+
+    // Check if the tile to the left is free and not the previous direction
+    if (
+      isTileFree(this.position, V2(-1, 0), tileSize) &&
+      this.data.previousDirection !== 2 &&
+      playerPosition.x < this.position.x
+    ) {
+      validDirectionsTowardsPlayer.push(1); // Add direction "left"
+    }
+
+    // Check if the tile to the right is free and not the previous direction
+    if (
+      isTileFree(this.position, V2(1, 0), tileSize) &&
+      this.data.previousDirection !== 1 &&
+      playerPosition.x > this.position.x
+    ) {
+      validDirectionsTowardsPlayer.push(2); // Add direction "right"
+    }
+
+    // Check if the tile above is free and not the previous direction
+    if (
+      isTileFree(this.position, V2(0, -1), tileSize) &&
+      this.data.previousDirection !== 4 &&
+      playerPosition.y < this.position.y
+    ) {
+      validDirectionsTowardsPlayer.push(3); // Add direction "up"
+    }
+
+    // Check if the tile below is free and not the previous direction
+    if (
+      isTileFree(this.position, V2(0, 1), tileSize) &&
+      this.data.previousDirection !== 3 &&
+      playerPosition.y > this.position.y
+    ) {
+      validDirectionsTowardsPlayer.push(4); // Add direction "down"
+    }
+
+    return validDirectionsTowardsPlayer;
+  }
+
   tick() {
     const tileSize = 50;
 
     // Check if ghost is in the middle of a tile
-    const isGhostMiddleOfTile = ((this.position.x % tileSize === 0) && (this.position.y % tileSize === 0));
+    const isGhostMiddleOfTile = this.position.x % tileSize === 0 && this.position.y % tileSize === 0;
 
     // Rule #1 ghost is allowed to change direction only when it's in the middle of a tile
     if (isGhostMiddleOfTile) {
-      this.chooseRandomDirection();
+      const moveTowardsPlayer = Math.random() < 0.5; // 50% chance to move towards the player
+
+      if (moveTowardsPlayer) {
+        const validDirectionsTowardsPlayer = this.checkValidDirectionsTowardsPlayer();
+
+        if (validDirectionsTowardsPlayer.length > 0) {
+          const randomDirectionIndex = Math.floor(Math.random() * validDirectionsTowardsPlayer.length);
+          this.data.randomDirection = validDirectionsTowardsPlayer[randomDirectionIndex];
+        } else {
+          this.chooseRandomDirection();
+        }
+      } else {
+        this.chooseRandomDirection();
+      }
     }
 
     // Move ghost in the chosen direction
@@ -97,4 +155,3 @@ class Ghost extends Enemy {
 }
 
 export { Ghost };
-

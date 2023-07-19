@@ -6,7 +6,7 @@ import { Vector2 as Vec2, V2 } from './engine/types.js';
 import { Box, Circle, Poly } from './engine/physics.js';
 import * as TGE from './engine/engine.js';
 import { isTileFree } from './pacman-utils.js';
-
+import { map } from './myMap.js';
 
 class Ghost extends Enemy {
   constructor(position) {
@@ -36,6 +36,37 @@ class Ghost extends Enemy {
     });
 
     this.data.randomDirection = 0
+    this.data.previousDirection = 0;
+  }
+
+  chooseRandomDirection() {
+    const tileSize = 50;
+
+    const validDirections = [];
+
+    // Check if the tile to the left is free and not the previous direction
+    if (isTileFree(this.position, V2(-1, 0), tileSize) && this.data.previousDirection !== 2) {
+      validDirections.push(1); // Add direction "left"
+    }
+
+    // Check if the tile to the right is free and not the previous direction
+    if (isTileFree(this.position, V2(1, 0), tileSize) && this.data.previousDirection !== 1) {
+      validDirections.push(2); // Add direction "right"
+    }
+
+    // Check if the tile above is free and not the previous direction
+    if (isTileFree(this.position, V2(0, -1), tileSize) && this.data.previousDirection !== 4) {
+      validDirections.push(3); // Add direction "up"
+    }
+
+    // Check if the tile below is free and not the previous direction
+    if (isTileFree(this.position, V2(0, 1), tileSize) && this.data.previousDirection !== 3) {
+      validDirections.push(4); // Add direction "down"
+    }
+
+    // Choose a random valid direction
+    const randomDirectionIndex = Math.floor(Math.random() * validDirections.length);
+    this.data.randomDirection = validDirections[randomDirectionIndex];
   }
 
   tick() {
@@ -46,39 +77,7 @@ class Ghost extends Enemy {
 
     // Rule #1 ghost is allowed to change direction only when it's in the middle of a tile
     if (isGhostMiddleOfTile) {
-      const validDirections = [];
-
-      // Check if the tile to the left is free
-      if (isTileFree(this.position, V2(-1, 0), tileSize)) { validDirections.push(1) }; // Add direction "left"
-
-      // Check if the tile to the right is free
-      if (isTileFree(this.position, V2(1, 0), tileSize)) { validDirections.push(2) }; // Add direction "right"
-
-      // Check if the tile above is free
-      if (isTileFree(this.position, V2(0, -1), tileSize)) { validDirections.push(3) }; // Add direction "up"
-
-      // Check if the tile below is free
-      if (isTileFree(this.position, V2(0, 1), tileSize)) { validDirections.push(4) }; // Add direction "down"
-
-      // Choose a direction to move
-      let chosenDirection;
-
-      // Check if there is only one valid direction
-      if (validDirections.length === 1) {
-        chosenDirection = validDirections[0];
-      } else {
-        // Check if moving forward in the current direction is a valid option
-        if (this.data.randomDirection && validDirections.includes(this.data.randomDirection)) {
-          chosenDirection = this.data.randomDirection;
-        } else {
-          // Choose a random valid direction
-          const randomDirectionIndex = Math.floor(Math.random() * validDirections.length);
-          chosenDirection = validDirections[randomDirectionIndex];
-        }
-      }
-
-      // Update the random direction for future movements
-      this.data.randomDirection = chosenDirection;
+      this.chooseRandomDirection();
     }
 
     // Move ghost in the chosen direction
@@ -91,6 +90,9 @@ class Ghost extends Enemy {
     } else if (this.data.randomDirection === 4) {
       this.position.y += 1;
     }
+
+    // Update previous direction
+    this.data.previousDirection = this.data.randomDirection;
   }
 }
 

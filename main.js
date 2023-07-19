@@ -8,12 +8,11 @@ import { Pacman } from './pacman.js'
 import { Ghost } from './ghost.js';
 import { Obstacle } from './obstacle.js'
 import { Pellet } from './pellet.js';
-
+import { map } from './myMap.js';
 const Engine = TGE.Engine;
 
 
 const tick = () => {
-
 };
 
 
@@ -34,15 +33,8 @@ const main = async () => {
   Engine.addActor(ghost);
   Engine.addActor(ghost2);
 
-  const obstacle = new Obstacle();
-  Engine.addActor(obstacle);
 
-  const pellet = new Pellet();
-  Engine.addActor(pellet);
-
-  // Create the obstacles
-  const map = await getJSON('./map.hjson');
-  // Create the obstacles based on the map
+  // Create the obstacles based on the Map
   const obstacles = [];
   for (let row = 0; row < map.length; row++) {
     for (let col = 0; col < map[row].length; col++) {
@@ -50,12 +42,13 @@ const main = async () => {
         const obstacleX = col * 50;
         const obstacleY = row * 50;
         const obstacle = new Obstacle(V2(obstacleX, obstacleY));
+        Engine.addActor(obstacle); // Add the obstacle to the engine
         obstacles.push(obstacle);
       }
     }
   }
 
-  // Create the pellets based on the map
+  // Create the pellets
   const pellets = [];
   for (let row = 0; row < map.length; row++) {
     for (let col = 0; col < map[row].length; col++) {
@@ -63,6 +56,7 @@ const main = async () => {
         const pelletX = col * 50; // Center X position of the pellet
         const pelletY = row * 50; // Center Y position of the pellet
         const pellet = new Pellet(V2(pelletX, pelletY));
+        Engine.addActor(pellet); // Add the pellet to the engine
         pellets.push(pellet);
       }
     }

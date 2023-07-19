@@ -32,6 +32,8 @@ class Obstacle extends Actor {
   }
 }
 
+
+
 export { Obstacle };
 
 

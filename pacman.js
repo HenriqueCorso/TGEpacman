@@ -9,6 +9,7 @@ import { map } from './myMap.js';
 class Pacman extends Player {
   constructor() {
     super({
+      name: 'pacman',
       owner: Engine.gameLoop,
       hasColliders: true,
       imgUrl: 'img/pacman.jpg',

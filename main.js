@@ -9,6 +9,10 @@ import { Ghost } from './ghost.js';
 import { Obstacle } from './obstacle.js'
 import { Pellet } from './pellet.js';
 import { map } from './myMap.js';
+import { PowerUp } from './powerUp.js';
+import { preloadImages } from './engine/utils.js';
+import { Flipbook } from './engine/flipbook.js';
+
 const Engine = TGE.Engine;
 
 
@@ -19,12 +23,22 @@ const tick = () => {
 const main = async () => {
   await Engine.setup('./settings.hjson');
 
-
   // TODO: Define the game entities (player, enemies, obstacles)
 
   // Create the player
   const player = new Pacman();
   Engine.addActor(player);
+
+  player.flags.isFlipbookEnabled = true;
+
+  const fb = new Flipbook({ dims: V2(5, 5), actor: player });
+
+  await fb.loadAsAtlas('img/pacmanMoving.png');
+
+  fb.addSequence({ name: 'moving', startFrame: 0, endFrame: 17, loop: true });
+
+  fb.play('moving');
+
 
   // Create the enemies (ghosts)
   const ghost = new Ghost(V2(350, 300));
@@ -61,6 +75,22 @@ const main = async () => {
       }
     }
   }
+
+  // Create the powerUP
+  const powerUps = [];
+  for (let row = 0; row < map.length; row++) {
+    for (let col = 0; col < map[row].length; col++) {
+      if (map[row][col] === 2) {
+        const powerUpX = col * 50; // Center X position of the powerUp
+        const powerUpY = row * 50; // Center Y position of the powerUp
+        const powerUP = new PowerUp(V2(powerUpX, powerUpY));
+        Engine.addActor(powerUP); // Add the pellet to the engine
+        powerUps.push(powerUP);
+      }
+    }
+  }
+
+  Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
 
   Engine.gameLoop.tickRate = 120; // doubles the game speed
   // Start the game loop

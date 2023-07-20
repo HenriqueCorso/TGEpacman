@@ -6,19 +6,19 @@ import { Box, Circle, Poly } from './engine/physics.js';
 import * as TGE from './engine/engine.js';
 
 
-class Pellet extends Actor {
+class PowerUp extends Actor {
   constructor(position) {
     super({
       owner: Engine.gameLoop,
       hasColliders: true,
       imgUrl: 'img/pellet.png',
-      scale: 0.05,
+      scale: 0.1,
       position: position
     });
     // Create collision circle for the pellet
-    const circlePellet = new Circle(V2(0, 0), 10);
+    const circlePowerUp = new Circle(V2(0, 0), 30);
 
-    this.colliders.add(circlePellet);
+    this.colliders.add(circlePowerUp);
     this.colliderType = 'Consumable';
     this.setCollisionResponseFlag({
       Consumable: TGE.Enum_HitTestMode.Ignore,
@@ -29,11 +29,23 @@ class Pellet extends Actor {
     this.events.add('beginoverlap', e => {
       // Remove the pellet when the player overlaps with it
       this.destroy();
-      console.log('Pellet collected');
-    });
+      console.log('PowerUp collected');
 
+      // Set isScared flag to true for all ghosts
+      const allGhosts = Engine.gameLoop.actors.filter(actor => actor.name === 'ghost');
+      allGhosts.forEach(ghost => {
+        ghost.isScared = true;
+      });
+
+      // After 5 seconds, set isScared flag back to false for all ghosts
+      setTimeout(() => {
+        allGhosts.forEach(ghost => {
+          ghost.isScared = false;
+        });
+      }, 5000);
+    });
   }
 }
 
 
-export { Pellet };
+export { PowerUp };

@@ -7,6 +7,9 @@ import { Box, Circle, Poly } from './engine/physics.js';
 import * as TGE from './engine/engine.js';
 import { isTileFree } from './pacman-utils.js';
 import { map } from './myMap.js';
+import { preloadImages } from './engine/utils.js';
+import { Flipbook } from './engine/flipbook.js';
+
 
 class Ghost extends Enemy {
   constructor(position) {
@@ -17,11 +20,16 @@ class Ghost extends Enemy {
       imgUrl: 'img/ghost.png',
       scale: 0.2,
       position: position
+
     });
+
 
     const circleGhost = new Circle(V2(0, 0), 100);
     this.colliders.add(circleGhost);
     this.colliderType = 'Enemy';
+
+    this.isScared = false; // New flag to indicate if the ghost is scared
+
     this.setCollisionResponseFlag({
       Consumable: TGE.Enum_HitTestMode.Ignore,
       Enemy: TGE.Enum_HitTestMode.Ignore,
@@ -29,14 +37,21 @@ class Ghost extends Enemy {
       Obstacle: TGE.Enum_HitTestMode.Ignore
     });
     this.events.add('beginoverlap', e => {
-      console.log('DEAD!');
-      // do something when player overlaps
-      // the event object contains reference to both parties of the overlap
-    });
+      if (this.isScared) {
+        // Destroy the ghost if it's scared and collided with the Pacman
+        this.destroy();
+        console.log('Ghost destroyed by Pacman');
+      } else {
+        // Handle the collision between a non-scared ghost and the Pacman
+        console.log('DEAD!')
+      }
+    }
+    );
 
     this.data.randomDirection = 0;
     this.data.previousDirection = 0;
   }
+
 
   chooseRandomDirection() {
     const tileSize = 50;

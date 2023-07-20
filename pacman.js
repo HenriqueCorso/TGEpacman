@@ -5,6 +5,8 @@ import { Box, Circle, Poly } from './engine/physics.js';
 import * as TGE from './engine/engine.js';
 import { isTileFree } from './pacman-utils.js';
 import { map } from './myMap.js';
+import { preloadImages } from './engine/utils.js';
+import { Flipbook } from './engine/flipbook.js';
 
 class Pacman extends Player {
   constructor() {
@@ -12,18 +14,16 @@ class Pacman extends Player {
       name: 'pacman',
       owner: Engine.gameLoop,
       hasColliders: true,
-      imgUrl: 'img/pacman.jpg',
       scale: 0.2,
       position: V2(150, 300)
     });
 
+
     const circlePlayer = new Circle(V2(0, 0), 100);
     this.movement.acceleration = 0;
     this.movementType = Enum_PlayerMovement.None;
-
     this.colliders.add(circlePlayer);
     this.attachKeyboard();
-
     this.setCollisionResponse('Obstacle', TGE.Enum_HitTestMode.Overlap);
   }
 

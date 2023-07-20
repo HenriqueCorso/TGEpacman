@@ -31,11 +31,11 @@ const main = async () => {
 
   player.flags.isFlipbookEnabled = true;
 
-  const fb = new Flipbook({ dims: V2(5, 5), actor: player });
+  const fb = new Flipbook({ dims: V2(4, 4), actor: player, fps: 10 });
 
   await fb.loadAsAtlas('img/pacmanMoving.png');
 
-  fb.addSequence({ name: 'moving', startFrame: 0, endFrame: 17, loop: true });
+  fb.addSequence({ name: 'moving', startFrame: 0, endFrame: 15, loop: true });
 
   fb.play('moving');
 

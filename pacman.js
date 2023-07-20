@@ -28,6 +28,7 @@ class Pacman extends Player {
   }
 
   tick() {
+    super.tick();
     const keys = this.controllers['keyboard'].keyState;
     const tileSize = 50;
 

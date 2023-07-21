@@ -36,14 +36,31 @@ class PowerUp extends Actor {
       const allGhosts = Engine.gameLoop.actors.filter(actor => actor.name === 'ghost');
       allGhosts.forEach(ghost => {
         ghost.isScared = true;
+
+        // Stop the current flipbook (if any) for the ghost
+        ghost.flipbooks[0].stop();
+
+
+        // Play the new flipbook representing the scared state
+        ghost.flipbooks[1].play('ScaredGhostMoving');
       });
 
       // After 5 seconds, set isScared flag back to false for all ghosts
-      allGhosts.forEach(ghost => ghost.addTimer({
-        duration: 120 * 5,         // 5 seconds
+      allGhosts.forEach(ghost => {
+        ghost.addTimer({
+          duration: 120 * 5,         // 5 seconds
+          onComplete: e => {
+            ghost.isScared = false;
+            console.log('Ghosts are back to normal');
 
-        onComplete: e => { e.actor.isScared = false; console.log('back to normal') }
-      }));
+            // Stop the current flipbook (if any) for the ghost
+            ghost.flipbooks[1].stop();
+
+            // Play the original flipbook representing the normal state
+            ghost.flipbooks[0].play('GhostMoving');
+          }
+        });
+      });
     });
   }
 }

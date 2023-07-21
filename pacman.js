@@ -15,7 +15,8 @@ class Pacman extends Player {
       owner: Engine.gameLoop,
       hasColliders: true,
       scale: 0.2,
-      position: V2(150, 300)
+      position: V2(150, 300),
+      rotation: Math.PI
     });
 
 
@@ -53,6 +54,19 @@ class Pacman extends Player {
 
     // Rule #3 if player did not move in any direction dureng last frame, it has hit a block and thus not allowed to continue movemnt
     if (Vec2.IsEqual(oldPos, this.position, 0.5)) this.data.desiredDirection = -1
+
+    // Update the Pacman's move animation based on the player's movement
+    if (this.data.desiredDirection !== -1) {
+      if (this.data.desiredDirection === 2) {
+        this.rotation = 0;
+      } else if (this.data.desiredDirection === 1) {
+        this.rotation = Math.PI;
+      } else if (this.data.desiredDirection === 4) {
+        this.rotation = Math.PI / 2;
+      } else if (this.data.desiredDirection === 3) {
+        this.rotation = -Math.PI / 2;
+      }
+    }
   }
 }
 

@@ -51,20 +51,29 @@ const main = async () => {
 
   // ghost1 moving flipbook
   const ghostFB = new Flipbook({ dims: V2(3, 3), actor: ghost, fps: 10 });
-  const ghostFBS = new Flipbook({ dims: V2(3, 3), actor: ghost, fps: 10 });
-
   await ghostFB.loadAsAtlas('img/ghostMoving.png');
-  await ghostFBS.loadAsAtlas('img/ghostMovingScared.png');
-
   ghostFB.addSequence({ name: 'GhostMoving', startFrame: 0, endFrame: 7, loop: true });
+  ghostFB.play('GhostMoving');
+
+  // ghost2 moving flipbook
+  const ghost2FB = new Flipbook({ dims: V2(3, 3), actor: ghost2, fps: 10 });
+  await ghost2FB.loadAsAtlas('img/ghostMoving2.png');
+  ghost2FB.addSequence({ name: 'GhostMoving', startFrame: 0, endFrame: 7, loop: true });
+  ghost2FB.play('GhostMoving');
+
+
+  // ghost1 scared flipbook
+  const ghostFBS = new Flipbook({ dims: V2(3, 3), actor: ghost, fps: 10 });
+  await ghostFBS.loadAsAtlas('img/ghostMovingScared.png');
   ghostFBS.addSequence({ name: 'ScaredGhostMoving', startFrame: 0, endFrame: 7, loop: true });
 
-  if (ghost.isScared) {
-    console.log('SCARED')
-    ghostFBS.play('ScaredGhostMoving');
-  } else {
-    ghostFB.play('GhostMoving');
-  }
+
+  // ghost2 scared flipbook
+  const ghost2FBS = new Flipbook({ dims: V2(3, 3), actor: ghost2, fps: 10 });
+  await ghost2FBS.loadAsAtlas('img/ghostMovingScared.png');
+  ghost2FBS.addSequence({ name: 'ScaredGhostMoving', startFrame: 0, endFrame: 7, loop: true });
+
+
 
 
   // Create the obstacles based on the Map

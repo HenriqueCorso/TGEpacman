@@ -17,8 +17,7 @@ class Ghost extends Enemy {
       owner: Engine.gameLoop,
       name: 'ghost',
       hasColliders: true,
-      imgUrl: 'img/ghost.png',
-      scale: 0.2,
+      scale: 0.13,
       position: position
 
     });
@@ -130,6 +129,8 @@ class Ghost extends Enemy {
   }
 
   tick() {
+    super.tick();
+
     const tileSize = 50;
 
     // Check if ghost is in the middle of a tile

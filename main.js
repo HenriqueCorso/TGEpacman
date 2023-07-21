@@ -31,13 +31,11 @@ const main = async () => {
 
   player.flags.isFlipbookEnabled = true;
 
-  const fb = new Flipbook({ dims: V2(4, 4), actor: player, fps: 10 });
-
-  await fb.loadAsAtlas('img/pacmanMoving.png');
-
-  fb.addSequence({ name: 'moving', startFrame: 0, endFrame: 15, loop: true });
-
-  fb.play('moving');
+  // pacman moving flipbook
+  const pacmanFB = new Flipbook({ dims: V2(4, 4), actor: player, fps: 10 });
+  await pacmanFB.loadAsAtlas('img/pacmanMoving.png');
+  pacmanFB.addSequence({ name: 'PacmanMoving', startFrame: 0, endFrame: 15, loop: true });
+  pacmanFB.play('PacmanMoving');
 
 
   // Create the enemies (ghosts)
@@ -46,6 +44,22 @@ const main = async () => {
 
   Engine.addActor(ghost);
   Engine.addActor(ghost2);
+
+  ghost.flags.isFlipbookEnabled = true;
+  ghost2.flags.isFlipbookEnabled = true;
+
+
+  // ghost1 moving flipbook
+  const ghostFB = new Flipbook({ dims: V2(3, 3), actor: ghost, fps: 10 });
+  await ghostFB.loadAsAtlas('img/ghostMoving.png');
+  ghostFB.addSequence({ name: 'GhostMoving', startFrame: 0, endFrame: 7, loop: true });
+  ghostFB.play('GhostMoving');
+
+  // ghost2 moving flipbook
+  const ghost2FB = new Flipbook({ dims: V2(3, 3), actor: ghost2, fps: 10 });
+  await ghost2FB.loadAsAtlas('img/ghostMoving2.png');
+  ghost2FB.addSequence({ name: 'GhostMoving', startFrame: 0, endFrame: 7, loop: true });
+  ghost2FB.play('GhostMoving');
 
 
   // Create the obstacles based on the Map

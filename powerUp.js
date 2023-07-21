@@ -13,7 +13,8 @@ class PowerUp extends Actor {
       hasColliders: true,
       imgUrl: 'img/pellet.png',
       scale: 0.1,
-      position: position
+      position: position,
+      zIndex: 0
     });
     // Create collision circle for the pellet
     const circlePowerUp = new Circle(V2(0, 0), 30);
@@ -38,14 +39,15 @@ class PowerUp extends Actor {
       });
 
       // After 5 seconds, set isScared flag back to false for all ghosts
-      setTimeout(() => {
-        allGhosts.forEach(ghost => {
-          ghost.isScared = false;
-        });
-      }, 5000);
+      allGhosts.forEach(ghost => ghost.addTimer({
+        duration: 120 * 5,         // 5 seconds
+        repeat: Infinity,
+        onRepeat: e => { e.actor.data.isScared = false; }
+      }));
     });
   }
 }
+
 
 
 export { PowerUp };

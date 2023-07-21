@@ -13,7 +13,8 @@ class Pellet extends Actor {
       hasColliders: true,
       imgUrl: 'img/pellet.png',
       scale: 0.05,
-      position: position
+      position: position,
+      zIndex: 0
     });
     // Create collision circle for the pellet
     const circlePellet = new Circle(V2(0, 0), 10);

@@ -51,15 +51,19 @@ const main = async () => {
 
   // ghost1 moving flipbook
   const ghostFB = new Flipbook({ dims: V2(3, 3), actor: ghost, fps: 10 });
-  await ghostFB.loadAsAtlas('img/ghostMoving.png');
-  ghostFB.addSequence({ name: 'GhostMoving', startFrame: 0, endFrame: 7, loop: true });
-  ghostFB.play('GhostMoving');
+  const ghostFBS = new Flipbook({ dims: V2(3, 3), actor: ghost, fps: 10 });
 
-  // ghost2 moving flipbook
-  const ghost2FB = new Flipbook({ dims: V2(3, 3), actor: ghost2, fps: 10 });
-  await ghost2FB.loadAsAtlas('img/ghostMoving2.png');
-  ghost2FB.addSequence({ name: 'GhostMoving', startFrame: 0, endFrame: 7, loop: true });
-  ghost2FB.play('GhostMoving');
+  await ghostFB.loadAsAtlas('img/ghostMoving.png');
+  await ghostFBS.loadAsAtlas('img/ghostMovingScared.png');
+
+  ghostFB.addSequence({ name: 'GhostMoving', startFrame: 0, endFrame: 7, loop: true });
+  ghostFBS.addSequence({ name: 'ScaredGhostMoving', startFrame: 0, endFrame: 7, loop: true });
+
+  if (ghost.isScared) {
+    ghostFBS.play('ScaredGhostMoving');
+  } else {
+    ghostFB.play('GhostMoving');
+  }
 
 
   // Create the obstacles based on the Map

@@ -60,6 +60,7 @@ const main = async () => {
   ghostFBS.addSequence({ name: 'ScaredGhostMoving', startFrame: 0, endFrame: 7, loop: true });
 
   if (ghost.isScared) {
+    console.log('SCARED')
     ghostFBS.play('ScaredGhostMoving');
   } else {
     ghostFB.play('GhostMoving');

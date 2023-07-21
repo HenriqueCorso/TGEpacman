@@ -41,8 +41,8 @@ class PowerUp extends Actor {
       // After 5 seconds, set isScared flag back to false for all ghosts
       allGhosts.forEach(ghost => ghost.addTimer({
         duration: 120 * 5,         // 5 seconds
-        repeat: Infinity,
-        onRepeat: e => { e.actor.data.isScared = false; }
+
+        onComplete: e => { e.actor.isScared = false; console.log('back to normal') }
       }));
     });
   }

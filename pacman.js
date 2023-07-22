@@ -7,6 +7,7 @@ import { isTileFree } from './pacman-utils.js';
 import { map } from './myMap.js';
 import { preloadImages } from './engine/utils.js';
 import { Flipbook } from './engine/flipbook.js';
+import { stopAndHideFlipbook, playAndShowFlipbook } from './pacman-utils.js';
 
 class Pacman extends Player {
   constructor() {
@@ -19,43 +20,71 @@ class Pacman extends Player {
       rotation: Math.PI
     });
 
-
-    const circlePlayer = new Circle(V2(0, 0), 100);
-    this.movement.acceleration = 0;
-    this.movementType = Enum_PlayerMovement.None;
-    this.colliders.add(circlePlayer);
+    this.initLifeSystem(); // Initialize the life system
+    this.initColliders(); // Initialize colliders and movement
     this.attachKeyboard();
     this.setCollisionResponse('Obstacle', TGE.Enum_HitTestMode.Overlap);
   }
 
-  tick() {
-    super.tick();
+  initLifeSystem() {
+    this.data.lives = 3;
+    this.data.isRespawning = false;
+  }
+
+  initColliders() {
+    const circlePlayer = new Circle(V2(0, 0), 100);
+    this.movement.acceleration = 0;
+    this.movementType = Enum_PlayerMovement.None;
+    this.colliders.add(circlePlayer);
+  }
+
+  handleCollisionWithGhost() {
+    const player = Engine.gameLoop.findActorByName('pacman');
+
+    if (!this.data.isRespawning) {
+      this.data.lives--;
+      if (this.data.lives <= 0) {
+        console.log('Game Over');
+        alert('GameOver');
+        location.reload();
+      } else {
+        console.log(`Respawning... Lives left: ${this.data.lives}`);
+        this.data.isRespawning = true;
+        this.flags.isVisible = false;
+        setTimeout(() => {
+          this.position = V2(150, 300);
+          this.data.isRespawning = false;
+          this.flags.isVisible = true;
+
+          stopAndHideFlipbook(player, 1);
+          playAndShowFlipbook(player, 0, 'PacmanMoving');
+        }, 2000);
+      }
+    }
+  }
+
+
+  handlePlayerMovement() {
     const keys = this.controllers['keyboard'].keyState;
     const tileSize = 50;
-
-    //check if player is exactly dead center over a tile (because that's the only situation when he's allowed to change directions!) otherwise he could be going partially over a block
     const isPlayerMiddleOfTile = ((this.position.x % tileSize == 0) && (this.position.y % tileSize == 0));
 
-    //Rule #1 player is allowed to change direction only whne he's in the middle of a tile (this rule can be further refined)
     if (isPlayerMiddleOfTile) {
       if (keys.left && this.position.y % 50 == 0) this.data.desiredDirection = 1;
       if (keys.right && this.position.y % 50 == 0) this.data.desiredDirection = 2;
       if (keys.up && this.position.x % 50 == 0) this.data.desiredDirection = 3;
       if (keys.down && this.position.x % 50 == 0) this.data.desiredDirection = 4;
     }
-    // save a copy of player's current position to se if rule #2 will result in player movement
+
     let oldPos = this.position.clone();
 
-    // Rule #2 move player to desired direction if the tile in the direction of movement is free
     if (this.data.desiredDirection == 1 && isTileFree(this.position, V2(-1, 0), tileSize)) this.position.x--;
     if (this.data.desiredDirection == 2 && isTileFree(this.position, V2(1, 0), tileSize)) this.position.x++;
     if (this.data.desiredDirection == 3 && isTileFree(this.position, V2(0, -1), tileSize)) this.position.y--;
     if (this.data.desiredDirection == 4 && isTileFree(this.position, V2(0, 1), tileSize)) this.position.y++;
 
-    // Rule #3 if player did not move in any direction dureng last frame, it has hit a block and thus not allowed to continue movemnt
-    if (Vec2.IsEqual(oldPos, this.position, 0.5)) this.data.desiredDirection = -1
+    if (Vec2.IsEqual(oldPos, this.position, 0.5)) this.data.desiredDirection = -1;
 
-    // Update the Pacman's move animation based on the player's movement
     if (this.data.desiredDirection !== -1) {
       if (this.data.desiredDirection === 2) {
         this.rotation = 0;
@@ -67,11 +96,12 @@ class Pacman extends Player {
         this.rotation = -Math.PI / 2;
       }
     }
+  }
 
-
+  tick() {
+    super.tick();
+    this.handlePlayerMovement();
   }
 }
-
-
 
 export { Pacman };

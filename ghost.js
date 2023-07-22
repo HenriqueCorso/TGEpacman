@@ -49,12 +49,17 @@ class Ghost extends Enemy {
 
   handleCollisionWithPacman() {
     const player = Engine.gameLoop.findActorByName('pacman');
+
     console.log('DEAD!');
-    //player.disableControllers();
+    player.handleCollisionWithGhost(); // Call the method in the player class to handle collision
     // Stop and hide the player's normal flipbook
-    // stopAndHideFlipbook(player, 0);
+    stopAndHideFlipbook(player, 0);
     // Play and show the player's dead flipbook
-    // playAndShowFlipbook(player, 1, 'PacmanDead');
+    playAndShowFlipbook(player, 1, 'PacmanDead');
+
+
+
+
   }
 
   moveGhost() {
@@ -146,6 +151,61 @@ class Ghost extends Enemy {
     return validDirectionsTowardsPlayer;
   }
 
+  moveAwayFromPlayer() {
+    const player = Engine.gameLoop.findActorByName('pacman');
+    const playerPosition = player.position;
+
+    const validDirectionsAwayFromPlayer = [];
+    const tileSize = 50;
+
+    // Check if the tile to the left is free and not the previous direction
+    if (
+      isTileFree(this.position, V2(-1, 0), tileSize) &&
+      this.data.previousDirection !== 2 &&
+      playerPosition.x > this.position.x
+    ) {
+      validDirectionsAwayFromPlayer.push(1); // Add direction "left"
+    }
+
+    // Check if the tile to the right is free and not the previous direction
+    if (
+      isTileFree(this.position, V2(1, 0), tileSize) &&
+      this.data.previousDirection !== 1 &&
+      playerPosition.x < this.position.x
+    ) {
+      validDirectionsAwayFromPlayer.push(2); // Add direction "right"
+    }
+
+    // Check if the tile above is free and not the previous direction
+    if (
+      isTileFree(this.position, V2(0, -1), tileSize) &&
+      this.data.previousDirection !== 4 &&
+      playerPosition.y > this.position.y
+    ) {
+      validDirectionsAwayFromPlayer.push(3); // Add direction "up"
+    }
+
+    // Check if the tile below is free and not the previous direction
+    if (
+      isTileFree(this.position, V2(0, 1), tileSize) &&
+      this.data.previousDirection !== 3 &&
+      playerPosition.y < this.position.y
+    ) {
+      validDirectionsAwayFromPlayer.push(4); // Add direction "down"
+    }
+
+    // If there are valid directions to move away from the player
+    if (validDirectionsAwayFromPlayer.length > 0) {
+      // Choose a random valid direction to move away from the player
+      const randomDirectionIndex = Math.floor(Math.random() * validDirectionsAwayFromPlayer.length);
+      this.data.randomDirection = validDirectionsAwayFromPlayer[randomDirectionIndex];
+    } else {
+      // If there are no valid directions to move away from the player,
+      // simply choose a random direction to move (similar to the previous behavior)
+      this.chooseRandomDirection();
+    }
+  }
+
   tick() {
     super.tick();
 
@@ -158,17 +218,21 @@ class Ghost extends Enemy {
     if (isGhostMiddleOfTile) {
       const moveTowardsPlayer = Math.random() < 0.5; // 50% chance to move towards the player
 
-      if (moveTowardsPlayer) {
-        const validDirectionsTowardsPlayer = this.checkValidDirectionsTowardsPlayer();
+      if (this.isScared) {
+        this.moveAwayFromPlayer();
+      } else {
+        if (moveTowardsPlayer) {
+          const validDirectionsTowardsPlayer = this.checkValidDirectionsTowardsPlayer();
 
-        if (validDirectionsTowardsPlayer.length > 0) {
-          const randomDirectionIndex = Math.floor(Math.random() * validDirectionsTowardsPlayer.length);
-          this.data.randomDirection = validDirectionsTowardsPlayer[randomDirectionIndex];
+          if (validDirectionsTowardsPlayer.length > 0) {
+            const randomDirectionIndex = Math.floor(Math.random() * validDirectionsTowardsPlayer.length);
+            this.data.randomDirection = validDirectionsTowardsPlayer[randomDirectionIndex];
+          } else {
+            this.chooseRandomDirection();
+          }
         } else {
           this.chooseRandomDirection();
         }
-      } else {
-        this.chooseRandomDirection();
       }
     }
 

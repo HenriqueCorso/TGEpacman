@@ -15,3 +15,17 @@ export const isTileFree = (pos, offset, tileSize) => {
     return map[mapPos.y][mapPos.x] === 0 || map[mapPos.y][mapPos.x] === 2;
   }
 };
+
+export const stopAndHideFlipbook = (actor, flipbookIndex) => {
+  if (actor.flipbooks && actor.flipbooks[flipbookIndex]) {
+    actor.flipbooks[flipbookIndex].stop();
+    actor.flipbooks[flipbookIndex].isVisible = false;
+  }
+}
+
+export const playAndShowFlipbook = (actor, flipbookIndex, sequenceName) => {
+  if (actor.flipbooks && actor.flipbooks[flipbookIndex]) {
+    actor.flipbooks[flipbookIndex].play(sequenceName);
+    actor.flipbooks[flipbookIndex].isVisible = true;
+  }
+}

@@ -9,7 +9,7 @@ import { isTileFree } from './pacman-utils.js';
 import { map } from './myMap.js';
 import { preloadImages } from './engine/utils.js';
 import { Flipbook } from './engine/flipbook.js';
-
+import { stopAndHideFlipbook, playAndShowFlipbook } from './pacman-utils.js';
 
 class Ghost extends Enemy {
   constructor(position) {
@@ -18,39 +18,57 @@ class Ghost extends Enemy {
       name: 'ghost',
       hasColliders: true,
       scale: 0.13,
-      position: position
-
+      position: position,
     });
-
 
     const circleGhost = new Circle(V2(0, 0), 100);
     this.colliders.add(circleGhost);
     this.colliderType = 'Enemy';
 
-    this.isScared = false; // New flag to indicate if the ghost is scared
+    this.data.isScared = false; // New flag to indicate if the ghost is scared
 
     this.setCollisionResponseFlag({
       Consumable: TGE.Enum_HitTestMode.Ignore,
       Enemy: TGE.Enum_HitTestMode.Ignore,
       Player: TGE.Enum_HitTestMode.Overlap,
-      Obstacle: TGE.Enum_HitTestMode.Ignore
+      Obstacle: TGE.Enum_HitTestMode.Ignore,
     });
-    this.events.add('beginoverlap', e => {
+    this.events.add('beginoverlap', (e) => {
       if (this.isScared) {
         // Destroy the ghost if it's scared and collided with the Pacman
         this.destroy();
         console.log('Ghost destroyed by Pacman');
       } else {
-        // Handle the collision between a non-scared ghost and the Pacman
-        console.log('DEAD!')
+        this.handleCollisionWithPacman();
       }
-    }
-    );
+    });
 
     this.data.randomDirection = 0;
     this.data.previousDirection = 0;
   }
 
+  handleCollisionWithPacman() {
+    const player = Engine.gameLoop.findActorByName('pacman');
+    console.log('DEAD!');
+    //player.disableControllers();
+    // Stop and hide the player's normal flipbook
+    // stopAndHideFlipbook(player, 0);
+    // Play and show the player's dead flipbook
+    // playAndShowFlipbook(player, 1, 'PacmanDead');
+  }
+
+  moveGhost() {
+    // Move ghost in the chosen direction
+    if (this.data.randomDirection === 1) {
+      this.position.x -= 1;
+    } else if (this.data.randomDirection === 2) {
+      this.position.x += 1;
+    } else if (this.data.randomDirection === 3) {
+      this.position.y -= 1;
+    } else if (this.data.randomDirection === 4) {
+      this.position.y += 1;
+    }
+  }
 
   chooseRandomDirection() {
     const tileSize = 50;
@@ -154,16 +172,7 @@ class Ghost extends Enemy {
       }
     }
 
-    // Move ghost in the chosen direction
-    if (this.data.randomDirection === 1) {
-      this.position.x -= 1;
-    } else if (this.data.randomDirection === 2) {
-      this.position.x += 1;
-    } else if (this.data.randomDirection === 3) {
-      this.position.y -= 1;
-    } else if (this.data.randomDirection === 4) {
-      this.position.y += 1;
-    }
+    this.moveGhost();
 
     // Update previous direction
     this.data.previousDirection = this.data.randomDirection;

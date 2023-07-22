@@ -67,6 +67,8 @@ class Pacman extends Player {
         this.rotation = -Math.PI / 2;
       }
     }
+
+
   }
 }
 

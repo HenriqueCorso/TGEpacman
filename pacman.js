@@ -19,11 +19,25 @@ class Pacman extends Player {
       position: V2(150, 300),
       rotation: Math.PI
     });
+  }
 
+  init = async () => {
     this.initLifeSystem(); // Initialize the life system
     this.initColliders(); // Initialize colliders and movement
     this.attachKeyboard();
     this.setCollisionResponse('Obstacle', TGE.Enum_HitTestMode.Overlap);
+
+    this.flags.isFlipbookEnabled = true;
+
+
+    const pacmanFB = new Flipbook({ dims: V2(4, 4), actor: this, fps: 10 });
+    await pacmanFB.loadAsAtlas('img/pacmanMoving.png');
+    pacmanFB.addSequence({ name: 'PacmanMoving', startFrame: 0, endFrame: 15, loop: true });
+    pacmanFB.play('PacmanMoving');
+
+    const pacmanDFB = new Flipbook({ dims: V2(5, 4), actor: this, fps: 10 });
+    await pacmanDFB.loadAsAtlas('img/pacmanDead.png');
+    pacmanDFB.addSequence({ name: 'PacmanDead', startFrame: 0, endFrame: 17, loop: false });
   }
 
   initLifeSystem() {

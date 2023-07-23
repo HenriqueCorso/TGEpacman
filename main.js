@@ -21,23 +21,16 @@ const tick = () => {
 
 const createPacman = async () => {
   const player = new Pacman();
-  Engine.addActor(player);
 
-  player.init();
+  await player.init();
 };
 
 const createGhosts = async () => {
   const ghost = new Ghost(V2(350, 300));
   const ghost2 = new Ghost(V2(350, 300));
 
-  Engine.addActor(ghost);
-  Engine.addActor(ghost2);
-
-  ghost.flags.isFlipbookEnabled = true;
-  ghost2.flags.isFlipbookEnabled = true;
-
-  ghost.init();
-  ghost2.init();
+  await ghost.init('img/ghostMoving.png');
+  await ghost2.init('img/ghostMoving2.png');
 };
 
 

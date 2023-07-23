@@ -22,6 +22,10 @@ class Pacman extends Player {
   }
 
   init = async () => {
+
+    Engine.addActor(this);
+
+
     this.initLifeSystem(); // Initialize the life system
     this.initColliders(); // Initialize colliders and movement
     this.attachKeyboard();

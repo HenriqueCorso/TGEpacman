@@ -22,7 +22,7 @@ class Ghost extends Enemy {
     });
   }
 
-  init = async () => {
+  init = async (flipbookName) => {
     const circleGhost = new Circle(V2(0, 0), 100);
     this.colliders.add(circleGhost);
     this.colliderType = 'Enemy';
@@ -48,9 +48,14 @@ class Ghost extends Enemy {
     this.data.randomDirection = 0;
     this.data.previousDirection = 0;
 
+    Engine.addActor(this);
+
+    this.flags.isFlipbookEnabled = true;
+
+
     // ghost moving flipbook
     const ghostFB = new Flipbook({ dims: V2(3, 3), actor: this, fps: 10 });
-    await ghostFB.loadAsAtlas('img/ghostMoving.png');
+    await ghostFB.loadAsAtlas(flipbookName);
     ghostFB.addSequence({ name: 'GhostMoving', startFrame: 0, endFrame: 7, loop: true });
     ghostFB.play('GhostMoving');
 

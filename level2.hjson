@@ -1,0 +1,29 @@
+type : 'tilemap'
+version : '1.0'
+texturePath : './img/map/'
+textureExt : '.png'
+textures : ['pellet', 'block', 'capBottom', 'capLeft', 'capRight', 'capTop', 'pipeConnectorBottom', 'pipeConnectorDownwards', 'pipeConnectorLeft', 'pipeConnectorRight', 'pipeConnectorTop', 'pipeCorner1', 'pipeCorner2', 'pipeCorner3', 'pipeCorner4', 'pipeCross', 'pipeHorizontal', 'pipeVertical']
+
+
+tileSize : 50
+tiles : [
+   '1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1'
+  '1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1'
+  '1 0 1 0 1 1 1 0 1 1 1 0 1 1 1 0 1 0 1'
+  '1 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 1'
+  '1 0 1 1 0 0 0 1 1 0 1 1 0 0 0 1 1 0 1'
+  '1 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 1'
+  '1 0 1 0 1 1 1 0 1 0 1 0 1 1 1 0 1 0 1'
+  '1 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 1'
+  '1 0 1 1 0 0 0 1 1 0 1 1 0 0 0 1 1 0 1'
+  '1 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 1'
+  '1 0 1 0 1 1 1 0 1 1 1 0 1 1 1 0 1 0 1'
+  '1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1'
+  '1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1'
+
+  ]
+initial : {
+	x:150
+	y:300
+}
+

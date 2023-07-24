@@ -96,10 +96,10 @@ class Pacman extends Player {
 
     let oldPos = this.position.clone();
 
-    if (this.data.desiredDirection == 1 && isTileFree(this.position, V2(-1, 0), tileSize)) this.position.x--;
-    if (this.data.desiredDirection == 2 && isTileFree(this.position, V2(1, 0), tileSize)) this.position.x++;
-    if (this.data.desiredDirection == 3 && isTileFree(this.position, V2(0, -1), tileSize)) this.position.y--;
-    if (this.data.desiredDirection == 4 && isTileFree(this.position, V2(0, 1), tileSize)) this.position.y++;
+    if (this.data.desiredDirection == 1 && isTileFree(this.position, V2(-1, 0), tileSize)) this.position.x -= 2;
+    if (this.data.desiredDirection == 2 && isTileFree(this.position, V2(1, 0), tileSize)) this.position.x += 2;
+    if (this.data.desiredDirection == 3 && isTileFree(this.position, V2(0, -1), tileSize)) this.position.y -= 2;
+    if (this.data.desiredDirection == 4 && isTileFree(this.position, V2(0, 1), tileSize)) this.position.y += 2;
 
     if (Vec2.IsEqual(oldPos, this.position, 0.5)) this.data.desiredDirection = -1;
 

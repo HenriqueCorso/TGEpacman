@@ -7,17 +7,17 @@ import { Pacman } from './pacman.js'
 import { Ghost } from './ghost.js';
 import { Obstacle } from './obstacle.js'
 import { Pellet } from './pellet.js';
-import { map } from './myMap.js';
 import { PowerUp } from './powerUp.js';
 import { preloadImages } from './engine/utils.js';
 import { Flipbook } from './engine/flipbook.js';
+import { TileMap } from './engine/tileMap.js';
+
 
 const Engine = TGE.Engine;
 
-
 const tick = () => {
-};
 
+};
 
 const createPacman = async () => {
   const player = new Pacman();
@@ -33,15 +33,20 @@ const createGhosts = async () => {
   await ghost2.init('img/ghostMoving2.png');
 };
 
+const createMap = async () => {
+  // Load the map data from level1.hjson
+  const { map } = await TileMap.LoadFromFile({ url: './level1.hjson' });
 
+  const tileSize = 50;
 
-const createMap = () => {
-  for (let row = 0; row < map.length; row++) {
-    for (let col = 0; col < map[row].length; col++) {
-      const position = V2(col * 50, row * 50);
-      const tileContent = map[row][col];
+  // Loop through the rows and columns of the tilemap
+  for (let row = 0; row < map.height; row++) {
+    for (let col = 0; col < map.width; col++) {
+      const tileValue = map.tileAt(col, row); // Get the tile value from the TileMap instance
 
-      switch (tileContent) {
+      const position = V2(col * tileSize + 25, row * tileSize + 25);
+
+      switch (tileValue) {
         case 1: // Obstacle
           const obstacle = new Obstacle(position);
           Engine.addActor(obstacle);
@@ -50,15 +55,15 @@ const createMap = () => {
           const pellet = new Pellet(position);
           Engine.addActor(pellet);
           break;
-        case 2: // PowerUp
+        case 2: // PowerUp 
           const powerUp = new PowerUp(position);
           Engine.addActor(powerUp);
           break;
-        // Add more cases for other tile content types, if needed
       }
     }
   }
 };
+
 
 const main = async () => {
   await Engine.setup('./settings.hjson');
@@ -68,8 +73,11 @@ const main = async () => {
   createMap();
 
   Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
+
   Engine.gameLoop.tickRate = 120;
   Engine.start(tick);
+
 };
+
 
 Engine.init(main);

@@ -16,9 +16,11 @@ class Pacman extends Player {
       owner: Engine.gameLoop,
       hasColliders: true,
       scale: 0.2,
-      position: V2(150, 300),
+      position: V2(50, 50),
       rotation: Math.PI
     });
+
+    this.canMove = true; // Add a flag to indicate if the player can move
   }
 
   init = async () => {
@@ -39,9 +41,11 @@ class Pacman extends Player {
     pacmanFB.addSequence({ name: 'PacmanMoving', startFrame: 0, endFrame: 15, loop: true });
     pacmanFB.play('PacmanMoving');
 
+    // Load the PacmanDead flipbook and set isFixed to true to stop rotation
     const pacmanDFB = new Flipbook({ dims: V2(5, 4), actor: this, fps: 10 });
     await pacmanDFB.loadAsAtlas('img/pacmanDead.png');
     pacmanDFB.addSequence({ name: 'PacmanDead', startFrame: 0, endFrame: 17, loop: false });
+    pacmanDFB.isFixed = true; // Set isFixed to true to stop rotation
   }
 
   initLifeSystem() {
@@ -69,13 +73,23 @@ class Pacman extends Player {
         console.log(`Respawning... Lives left: ${this.data.lives}`);
         this.data.isRespawning = true;
         this.flags.isVisible = false;
+
+        // Disable movement when the player loses a life
+        this.canMove = false;
+
         setTimeout(() => {
-          this.position = V2(150, 300);
+          this.position = V2(50, 50);
           this.data.isRespawning = false;
           this.flags.isVisible = true;
 
           stopAndHideFlipbook(player, 1);
           playAndShowFlipbook(player, 0, 'PacmanMoving');
+
+          // Reset desiredDirection to prevent movement in the next tick
+          this.data.desiredDirection = -1;
+
+          // Enable movement again after the player respawns
+          this.canMove = true;
         }, 2000);
       }
     }
@@ -86,6 +100,8 @@ class Pacman extends Player {
     const keys = this.controllers['keyboard'].keyState;
     const tileSize = 50;
     const isPlayerMiddleOfTile = ((this.position.x % tileSize == 0) && (this.position.y % tileSize == 0));
+
+    if (!this.canMove) return;
 
     if (isPlayerMiddleOfTile) {
       if (keys.left && this.position.y % 50 == 0) this.data.desiredDirection = 1;
@@ -104,15 +120,10 @@ class Pacman extends Player {
     if (Vec2.IsEqual(oldPos, this.position, 0.5)) this.data.desiredDirection = -1;
 
     if (this.data.desiredDirection !== -1) {
-      if (this.data.desiredDirection === 2) {
-        this.rotation = 0;
-      } else if (this.data.desiredDirection === 1) {
-        this.rotation = Math.PI;
-      } else if (this.data.desiredDirection === 4) {
-        this.rotation = Math.PI / 2;
-      } else if (this.data.desiredDirection === 3) {
-        this.rotation = -Math.PI / 2;
-      }
+      if (this.data.desiredDirection === 1) { this.rotation = Math.PI; }
+      else if (this.data.desiredDirection === 2) { this.rotation = 0; }
+      else if (this.data.desiredDirection === 3) { this.rotation = -Math.PI / 2; }
+      else if (this.data.desiredDirection === 4) { this.rotation = Math.PI / 2; }
     }
   }
 

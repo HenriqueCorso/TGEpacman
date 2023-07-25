@@ -11,6 +11,7 @@ class MyMap extends TileMap {
     super();
   }
 
+
   async createMap() {
     // Load the map data from level1.hjson
     const { map } = await TileMap.LoadFromFile({ url: './level1.hjson' });
@@ -24,20 +25,23 @@ class MyMap extends TileMap {
 
         const position = V2(col * tileSize, row * tileSize);
 
+        let actor = null; // Define a variable to hold the actor
+
         switch (tileValue) {
           case 1: // Obstacle
-            const obstacle = new Obstacle(position);
-            Engine.addActor(obstacle);
+            actor = new Obstacle(position);
             break;
           case 0: // Pellet
-            const pellet = new Pellet(position);
-            Engine.addActor(pellet);
+            actor = new Pellet(position);
             break;
           case 2: // PowerUp 
-            const powerUp = new PowerUp(position);
-            Engine.addActor(powerUp);
+            actor = new PowerUp(position);
             break;
         }
+
+
+        Engine.addActor(actor); // Add the actor to the engine 
+
       }
     }
   }

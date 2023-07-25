@@ -19,17 +19,18 @@ export const isTileFree = (pos, offset, tileSize) => {
 
 // Utility function to stop and hide a specific flipbook of an actor
 export const stopAndHideFlipbook = (actor, flipbookIndex) => {
-  if (actor.flipbooks && actor.flipbooks[flipbookIndex]) {
-    actor.flipbooks[flipbookIndex].stop();
-    actor.flipbooks[flipbookIndex].isVisible = false;
-  }
+  const fb = actor?.flipbooks[flipbookIndex];       // makes sure actor exists before testing
+  if (!fb) return;                                 // return early pattern
+  fb.stop();
+  fb.isVisible = false;
 };
 
 // Utility function to play and show a specific flipbook sequence of an actor
 export const playAndShowFlipbook = (actor, flipbookIndex, sequenceName) => {
-  if (actor.flipbooks && actor.flipbooks[flipbookIndex]) {
-    actor.flipbooks[flipbookIndex].play(sequenceName);
-    actor.flipbooks[flipbookIndex].isVisible = true;
-  }
+  const fb = actor?.flipbooks[flipbookIndex];
+  if (!fb) return;
+  fb.play(sequenceName);
+  fb.isVisible = true;
 };
+
 

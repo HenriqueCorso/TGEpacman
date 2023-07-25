@@ -2,10 +2,6 @@ import * as TGE from './engine/engine.js';
 import { Vector2 as Vec2, V2 } from './engine/types.js';
 import { Pacman } from './pacman.js'
 import { Ghost } from './ghost.js';
-import { Obstacle } from './obstacle.js'
-import { Pellet } from './pellet.js';
-import { PowerUp } from './powerUp.js';
-import { TileMap } from './engine/tileMap.js';
 import { MyMap } from './myMap.js';
 
 const Engine = TGE.Engine;

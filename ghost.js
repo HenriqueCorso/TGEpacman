@@ -1,13 +1,9 @@
 import { Enemy } from './engine/enemy.js';
-import { Vector2 } from './engine/types.js';
-import { Player, Enum_PlayerMovement } from './engine/player.js';
 import { Engine } from './engine/engine.js';
 import { Vector2 as Vec2, V2 } from './engine/types.js';
 import { Box, Circle, Poly } from './engine/physics.js';
 import * as TGE from './engine/engine.js';
 import { isTileFree } from './pacman-utils.js';
-import { map } from './myMap.js';
-import { preloadImages } from './engine/utils.js';
 import { Flipbook } from './engine/flipbook.js';
 import { stopAndHideFlipbook, playAndShowFlipbook } from './pacman-utils.js';
 

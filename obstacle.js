@@ -1,5 +1,4 @@
 import { Actor } from './engine/actor.js';
-import { Player, Enum_PlayerMovement } from './engine/player.js';
 import { Engine } from './engine/engine.js';
 import { Vector2 as Vec2, V2 } from './engine/types.js';
 import { Box, Circle, Poly } from './engine/physics.js';

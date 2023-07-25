@@ -1,15 +1,10 @@
 import * as TGE from './engine/engine.js';
 import { Vector2 as Vec2, V2 } from './engine/types.js';
-import { Box, Circle, Poly } from './engine/physics.js';
-import { getJSON } from './engine/utils.js';
-import { Player, Enum_PlayerMovement } from './engine/player.js';
 import { Pacman } from './pacman.js'
 import { Ghost } from './ghost.js';
 import { Obstacle } from './obstacle.js'
 import { Pellet } from './pellet.js';
 import { PowerUp } from './powerUp.js';
-import { preloadImages } from './engine/utils.js';
-import { Flipbook } from './engine/flipbook.js';
 import { TileMap } from './engine/tileMap.js';
 
 

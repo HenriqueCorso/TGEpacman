@@ -28,12 +28,13 @@ const createGhosts = async () => {
 const main = async () => {
   await Engine.setup('./settings.hjson');
 
+  const myMap = new MyMap();
+  await myMap.createMap();
+
+
   await createPacman();
   await createGhosts();
 
-
-  const myMap = new MyMap();
-  await myMap.createMap();
 
   Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
 

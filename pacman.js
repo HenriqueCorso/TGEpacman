@@ -3,7 +3,8 @@ import { Engine } from './engine/engine.js';
 import { Vector2 as Vec2, V2 } from './engine/types.js';
 import { Box, Circle, Poly } from './engine/physics.js';
 import * as TGE from './engine/engine.js';
-import { isTileFree } from './pacman-utils.js';
+import { MyMap } from './myMap.js'; // Import the MyMap class
+import { preloadImages } from './engine/utils.js';
 import { Flipbook } from './engine/flipbook.js';
 import { stopAndHideFlipbook, playAndShowFlipbook } from './pacman-utils.js';
 
@@ -15,16 +16,12 @@ class Pacman extends Player {
       hasColliders: true,
       scale: 0.2,
       position: V2(50, 50),
-      rotation: Math.PI
+      rotation: Math.PI,
     });
-
-    this.canMove = true; // Add a flag to indicate if the player can move
   }
 
   init = async () => {
-
     Engine.addActor(this);
-
 
     this.initLifeSystem(); // Initialize the life system
     this.initColliders(); // Initialize colliders and movement
@@ -33,18 +30,15 @@ class Pacman extends Player {
 
     this.flags.isFlipbookEnabled = true;
 
-
     const pacmanFB = new Flipbook({ dims: V2(4, 4), actor: this, fps: 10 });
     await pacmanFB.loadAsAtlas('img/pacmanMoving.png');
     pacmanFB.addSequence({ name: 'PacmanMoving', startFrame: 0, endFrame: 15, loop: true });
     pacmanFB.play('PacmanMoving');
 
-    // Load the PacmanDead flipbook and set isFixed to true to stop rotation
     const pacmanDFB = new Flipbook({ dims: V2(5, 4), actor: this, fps: 10 });
     await pacmanDFB.loadAsAtlas('img/pacmanDead.png');
     pacmanDFB.addSequence({ name: 'PacmanDead', startFrame: 0, endFrame: 17, loop: false });
-    pacmanDFB.isFixed = true; // Set isFixed to true to stop rotation
-  }
+  };
 
   initLifeSystem() {
     this.data.lives = 3;
@@ -71,10 +65,6 @@ class Pacman extends Player {
         console.log(`Respawning... Lives left: ${this.data.lives}`);
         this.data.isRespawning = true;
         this.flags.isVisible = false;
-
-        // Disable movement when the player loses a life
-        this.canMove = false;
-
         setTimeout(() => {
           this.position = V2(50, 50);
           this.data.isRespawning = false;
@@ -82,24 +72,15 @@ class Pacman extends Player {
 
           stopAndHideFlipbook(player, 1);
           playAndShowFlipbook(player, 0, 'PacmanMoving');
-
-          // Reset desiredDirection to prevent movement in the next tick
-          this.data.desiredDirection = -1;
-
-          // Enable movement again after the player respawns
-          this.canMove = true;
         }, 2000);
       }
     }
   }
 
-
   handlePlayerMovement() {
     const keys = this.controllers['keyboard'].keyState;
     const tileSize = 50;
-    const isPlayerMiddleOfTile = ((this.position.x % tileSize == 0) && (this.position.y % tileSize == 0));
-
-    if (!this.canMove) return;
+    const isPlayerMiddleOfTile = this.position.x % tileSize == 0 && this.position.y % tileSize == 0;
 
     if (isPlayerMiddleOfTile) {
       if (keys.left && this.position.y % 50 == 0) this.data.desiredDirection = 1;
@@ -110,19 +91,33 @@ class Pacman extends Player {
 
     let oldPos = this.position.clone();
 
-    if (this.data.desiredDirection == 1 && isTileFree(this.position, V2(-1, 0), tileSize)) this.position.x -= 2;
-    if (this.data.desiredDirection == 2 && isTileFree(this.position, V2(1, 0), tileSize)) this.position.x += 2;
-    if (this.data.desiredDirection == 3 && isTileFree(this.position, V2(0, -1), tileSize)) this.position.y -= 2;
-    if (this.data.desiredDirection == 4 && isTileFree(this.position, V2(0, 1), tileSize)) this.position.y += 2;
+    if (this.data.desiredDirection == 1 && this.isTileFree(this.position, V2(-1, 0), tileSize))
+      this.position.x -= 2;
+    if (this.data.desiredDirection == 2 && this.isTileFree(this.position, V2(1, 0), tileSize))
+      this.position.x += 2;
+    if (this.data.desiredDirection == 3 && this.isTileFree(this.position, V2(0, -1), tileSize))
+      this.position.y -= 2;
+    if (this.data.desiredDirection == 4 && this.isTileFree(this.position, V2(0, 1), tileSize))
+      this.position.y += 2;
 
     if (Vec2.IsEqual(oldPos, this.position, 0.5)) this.data.desiredDirection = -1;
 
     if (this.data.desiredDirection !== -1) {
-      if (this.data.desiredDirection === 1) { this.rotation = Math.PI; }
-      else if (this.data.desiredDirection === 2) { this.rotation = 0; }
-      else if (this.data.desiredDirection === 3) { this.rotation = -Math.PI / 2; }
-      else if (this.data.desiredDirection === 4) { this.rotation = Math.PI / 2; }
+      if (this.data.desiredDirection === 2) {
+        this.rotation = 0;
+      } else if (this.data.desiredDirection === 1) {
+        this.rotation = Math.PI;
+      } else if (this.data.desiredDirection === 4) {
+        this.rotation = Math.PI / 2;
+      } else if (this.data.desiredDirection === 3) {
+        this.rotation = -Math.PI / 2;
+      }
     }
+  }
+
+  async isTileFree(pos, offset, tileSize) {
+    const myMap = new MyMap(); // Create an instance of MyMap
+    return myMap.isTileFree(pos, offset, tileSize); // Use the MyMap instance to check if the tile is free
   }
 
   tick() {

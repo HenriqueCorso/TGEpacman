@@ -3,9 +3,10 @@ import { Engine } from './engine/engine.js';
 import { Vector2 as Vec2, V2 } from './engine/types.js';
 import { Box, Circle, Poly } from './engine/physics.js';
 import * as TGE from './engine/engine.js';
-import { isTileFree } from './pacman-utils.js';
 import { Flipbook } from './engine/flipbook.js';
 import { stopAndHideFlipbook, playAndShowFlipbook } from './pacman-utils.js';
+import { MyMap } from './myMap.js';
+
 
 class Ghost extends Enemy {
   constructor(position) {
@@ -96,22 +97,22 @@ class Ghost extends Enemy {
     const validDirections = [];
 
     // Check if the tile to the left is free and not the previous direction
-    if (isTileFree(this.position, V2(-1, 0), tileSize) && this.data.previousDirection !== 2) {
+    if (this.isTileFree(this.position, V2(-1, 0), tileSize) && this.data.previousDirection !== 2) {
       validDirections.push(1); // Add direction "left"
     }
 
     // Check if the tile to the right is free and not the previous direction
-    if (isTileFree(this.position, V2(1, 0), tileSize) && this.data.previousDirection !== 1) {
+    if (this.isTileFree(this.position, V2(1, 0), tileSize) && this.data.previousDirection !== 1) {
       validDirections.push(2); // Add direction "right"
     }
 
     // Check if the tile above is free and not the previous direction
-    if (isTileFree(this.position, V2(0, -1), tileSize) && this.data.previousDirection !== 4) {
+    if (this.isTileFree(this.position, V2(0, -1), tileSize) && this.data.previousDirection !== 4) {
       validDirections.push(3); // Add direction "up"
     }
 
     // Check if the tile below is free and not the previous direction
-    if (isTileFree(this.position, V2(0, 1), tileSize) && this.data.previousDirection !== 3) {
+    if (this.isTileFree(this.position, V2(0, 1), tileSize) && this.data.previousDirection !== 3) {
       validDirections.push(4); // Add direction "down"
     }
 
@@ -129,7 +130,7 @@ class Ghost extends Enemy {
 
     // Check if the tile to the left is free and not the previous direction
     if (
-      isTileFree(this.position, V2(-1, 0), tileSize) &&
+      this.isTileFree(this.position, V2(-1, 0), tileSize) &&
       this.data.previousDirection !== 2 &&
       playerPosition.x < this.position.x
     ) {
@@ -138,7 +139,7 @@ class Ghost extends Enemy {
 
     // Check if the tile to the right is free and not the previous direction
     if (
-      isTileFree(this.position, V2(1, 0), tileSize) &&
+      this.isTileFree(this.position, V2(1, 0), tileSize) &&
       this.data.previousDirection !== 1 &&
       playerPosition.x > this.position.x
     ) {
@@ -147,7 +148,7 @@ class Ghost extends Enemy {
 
     // Check if the tile above is free and not the previous direction
     if (
-      isTileFree(this.position, V2(0, -1), tileSize) &&
+      this.isTileFree(this.position, V2(0, -1), tileSize) &&
       this.data.previousDirection !== 4 &&
       playerPosition.y < this.position.y
     ) {
@@ -156,7 +157,7 @@ class Ghost extends Enemy {
 
     // Check if the tile below is free and not the previous direction
     if (
-      isTileFree(this.position, V2(0, 1), tileSize) &&
+      this.isTileFree(this.position, V2(0, 1), tileSize) &&
       this.data.previousDirection !== 3 &&
       playerPosition.y > this.position.y
     ) {
@@ -175,7 +176,7 @@ class Ghost extends Enemy {
 
     // Check if the tile to the left is free and not the previous direction
     if (
-      isTileFree(this.position, V2(-1, 0), tileSize) &&
+      this.isTileFree(this.position, V2(-1, 0), tileSize) &&
       this.data.previousDirection !== 2 &&
       playerPosition.x > this.position.x
     ) {
@@ -184,7 +185,7 @@ class Ghost extends Enemy {
 
     // Check if the tile to the right is free and not the previous direction
     if (
-      isTileFree(this.position, V2(1, 0), tileSize) &&
+      this.isTileFree(this.position, V2(1, 0), tileSize) &&
       this.data.previousDirection !== 1 &&
       playerPosition.x < this.position.x
     ) {
@@ -193,7 +194,7 @@ class Ghost extends Enemy {
 
     // Check if the tile above is free and not the previous direction
     if (
-      isTileFree(this.position, V2(0, -1), tileSize) &&
+      this.isTileFree(this.position, V2(0, -1), tileSize) &&
       this.data.previousDirection !== 4 &&
       playerPosition.y > this.position.y
     ) {
@@ -202,7 +203,7 @@ class Ghost extends Enemy {
 
     // Check if the tile below is free and not the previous direction
     if (
-      isTileFree(this.position, V2(0, 1), tileSize) &&
+      this.isTileFree(this.position, V2(0, 1), tileSize) &&
       this.data.previousDirection !== 3 &&
       playerPosition.y < this.position.y
     ) {
@@ -219,6 +220,11 @@ class Ghost extends Enemy {
       // simply choose a random direction to move (similar to the previous behavior)
       this.chooseRandomDirection();
     }
+  }
+
+  async isTileFree(pos, offset, tileSize) {
+    const myMap = new MyMap(); // Create an instance of MyMap
+    return myMap.isTileFree(pos, offset, tileSize); // Use the MyMap instance to check if the tile is free
   }
 
   tick() {

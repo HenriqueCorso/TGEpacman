@@ -6,11 +6,12 @@ import { Pellet } from './pellet.js';
 import { PowerUp } from './powerUp.js';
 
 
+
+
 class MyMap extends TileMap {
   constructor() {
     super();
   }
-
 
   async createMap() {
     // Load the map data from level1.hjson
@@ -39,12 +40,22 @@ class MyMap extends TileMap {
             break;
         }
 
-
         Engine.addActor(actor); // Add the actor to the engine 
-
       }
     }
   }
-}
 
-export { MyMap }
+  // Utility function to check if a tile is free for Pacman to move
+  isTileFree(pos, offset, tileSize) {
+    // If the player is moving down or right, add the width and height of the player to the coordinates, which is the same as tileSize, to verify a hit right or below.
+    if (offset.x == 1 || offset.y == 1) {
+      const mapPos = Vec2.Add(Vec2.ToInt(Vec2.DivScalar(pos, tileSize)), offset);
+      return this.tileAt(mapPos.x, mapPos.y) === 0 || this.tileAt(mapPos.x, mapPos.y) === 2;
+    } else {
+      // Otherwise, deduct the pixels of movement direction from the current position to verify a hit above or left.
+      const mapPos = Vec2.ToInt(Vec2.DivScalar(Vec2.Add(pos, offset), tileSize));
+      return this.tileAt(mapPos.x, mapPos.y) === 0 || this.tileAt(mapPos.x, mapPos.y) === 2;
+    }
+  }
+}
+export { MyMap };

@@ -2,7 +2,11 @@ import * as TGE from './engine/engine.js';
 import { Vector2 as Vec2, V2 } from './engine/types.js';
 import { Pacman } from './pacman.js'
 import { Ghost } from './ghost.js';
-import { MyMap } from './myMap.js';
+import { isTileFree } from './pacman-utils.js';
+import { TileMap } from './engine/tileMap.js';
+import { Obstacle } from './obstacle.js';
+import { Pellet } from './pellet.js';
+import { PowerUp } from './powerUp.js';
 
 const Engine = TGE.Engine;
 
@@ -24,16 +28,48 @@ const createGhosts = async () => {
   await ghost2.init('img/ghostMoving2.png');
 };
 
+const createMap = () => {
+  // Load the map data from level1.hjson
+
+  const tileSize = 50;
+
+  // Loop through the rows and columns of the tilemap
+  for (let row = 0; row < this.height; row++) {
+    for (let col = 0; col < this.width; col++) {
+      const tileValue = this.tileAt(col, row); // Get the tile value from the TileMap instance
+
+      const position = V2(col * tileSize, row * tileSize);
+
+      let actor = null; // Define a variable to hold the actor
+
+      switch (tileValue) {
+        case 1: // Obstacle
+          actor = new Obstacle(position);
+          break;
+        case 0: // Pellet
+          actor = new Pellet(position);
+          break;
+        case 2: // PowerUp 
+          actor = new PowerUp(position);
+          break;
+      }
+
+      Engine.addActor(actor); // Add the actor to the engine
+
+      console.log('Creating the actors for map');
+    }
+  }
+}
 
 const main = async () => {
   await Engine.setup('./settings.hjson');
 
-  const myMap = new MyMap();
-  await myMap.createMap();
 
-  Engine.gameLoop.data.map = myMap;
+  const { map } = await TileMap.LoadFromFile({ url: './level1.hjson' });
+  map.createMap = createMap;
+  map.isTileFree = isTileFree;
 
-
+  Engine.gameLoop.data.map = map;
 
 
   await createPacman();

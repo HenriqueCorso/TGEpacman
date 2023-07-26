@@ -3,7 +3,6 @@ import { Engine } from './engine/engine.js';
 import { Vector2 as Vec2, V2 } from './engine/types.js';
 import { Box, Circle, Poly } from './engine/physics.js';
 import * as TGE from './engine/engine.js';
-import { MyMap } from './myMap.js'; // Import the MyMap class
 import { preloadImages } from './engine/utils.js';
 import { Flipbook } from './engine/flipbook.js';
 import { stopAndHideFlipbook, playAndShowFlipbook } from './pacman-utils.js';
@@ -78,6 +77,7 @@ class Pacman extends Player {
   }
 
   handlePlayerMovement() {
+    const map = this.owner.data.map;
     const keys = this.controllers['keyboard'].keyState;
     const tileSize = 50;
     const isPlayerMiddleOfTile = this.position.x % tileSize == 0 && this.position.y % tileSize == 0;
@@ -91,13 +91,13 @@ class Pacman extends Player {
 
     let oldPos = this.position.clone();
 
-    if (this.data.desiredDirection == 1 && this.isTileFree(this.position, V2(-1, 0), tileSize))
+    if (this.data.desiredDirection == 1 && map.isTileFree(this.position, V2(-1, 0), tileSize))
       this.position.x -= 2;
-    if (this.data.desiredDirection == 2 && this.isTileFree(this.position, V2(1, 0), tileSize))
+    if (this.data.desiredDirection == 2 && map.isTileFree(this.position, V2(1, 0), tileSize))
       this.position.x += 2;
-    if (this.data.desiredDirection == 3 && this.isTileFree(this.position, V2(0, -1), tileSize))
+    if (this.data.desiredDirection == 3 && map.isTileFree(this.position, V2(0, -1), tileSize))
       this.position.y -= 2;
-    if (this.data.desiredDirection == 4 && this.isTileFree(this.position, V2(0, 1), tileSize))
+    if (this.data.desiredDirection == 4 && map.isTileFree(this.position, V2(0, 1), tileSize))
       this.position.y += 2;
 
     if (Vec2.IsEqual(oldPos, this.position, 0.5)) this.data.desiredDirection = -1;
@@ -115,10 +115,6 @@ class Pacman extends Player {
     }
   }
 
-  isTileFree(pos, offset, tileSize) {
-    const myMap = this.owner.data.map;
-    return myMap.isTileFree(pos, offset, tileSize); // Use the MyMap instance to check if the tile is free
-  }
 
   tick() {
     super.tick();

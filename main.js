@@ -31,6 +31,10 @@ const main = async () => {
   const myMap = new MyMap();
   await myMap.createMap();
 
+  Engine.gameLoop.data.map = myMap;
+
+
+
 
   await createPacman();
   await createGhosts();

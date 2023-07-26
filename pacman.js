@@ -115,8 +115,8 @@ class Pacman extends Player {
     }
   }
 
-  async isTileFree(pos, offset, tileSize) {
-    const myMap = new MyMap(); // Create an instance of MyMap
+  isTileFree(pos, offset, tileSize) {
+    const myMap = this.owner.data.map;
     return myMap.isTileFree(pos, offset, tileSize); // Use the MyMap instance to check if the tile is free
   }
 

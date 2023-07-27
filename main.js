@@ -28,7 +28,7 @@ const createGhosts = async () => {
   await ghost2.init('img/ghostMoving2.png');
 };
 
-const createMap = () => {
+function createMap() {
   // Load the map data from level1.hjson
 
   const tileSize = 50;
@@ -56,7 +56,6 @@ const createMap = () => {
 
       Engine.addActor(actor); // Add the actor to the engine
 
-      console.log('Creating the actors for map');
     }
   }
 }
@@ -68,6 +67,9 @@ const main = async () => {
   const { map } = await TileMap.LoadFromFile({ url: './level1.hjson' });
   map.createMap = createMap;
   map.isTileFree = isTileFree;
+
+  map.createMap();
+
 
   Engine.gameLoop.data.map = map;
 

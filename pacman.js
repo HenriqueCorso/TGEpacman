@@ -3,7 +3,6 @@ import { Engine } from './engine/engine.js';
 import { Vector2 as Vec2, V2 } from './engine/types.js';
 import { Box, Circle, Poly } from './engine/physics.js';
 import * as TGE from './engine/engine.js';
-import { preloadImages } from './engine/utils.js';
 import { Flipbook } from './engine/flipbook.js';
 import { stopAndHideFlipbook, playAndShowFlipbook } from './pacman-utils.js';
 
@@ -17,6 +16,8 @@ class Pacman extends Player {
       position: V2(50, 50),
       rotation: Math.PI,
     });
+
+    this.canMove = true; // Add a flag to indicate if the player can move
   }
 
   init = async () => {
@@ -64,6 +65,10 @@ class Pacman extends Player {
         console.log(`Respawning... Lives left: ${this.data.lives}`);
         this.data.isRespawning = true;
         this.flags.isVisible = false;
+
+        // Disable movement when the player loses a life
+        this.canMove = false;
+
         setTimeout(() => {
           this.position = V2(50, 50);
           this.data.isRespawning = false;
@@ -71,6 +76,8 @@ class Pacman extends Player {
 
           stopAndHideFlipbook(player, 1);
           playAndShowFlipbook(player, 0, 'PacmanMoving');
+
+          this.canMove = true;
         }, 2000);
       }
     }
@@ -81,6 +88,9 @@ class Pacman extends Player {
     const keys = this.controllers['keyboard'].keyState;
     const tileSize = 50;
     const isPlayerMiddleOfTile = this.position.x % tileSize == 0 && this.position.y % tileSize == 0;
+
+    if (!this.canMove) return;
+
 
     if (isPlayerMiddleOfTile) {
       if (keys.left && this.position.y % 50 == 0) this.data.desiredDirection = 1;

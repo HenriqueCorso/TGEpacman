@@ -16,6 +16,11 @@ class Ghost extends Enemy {
       scale: 0.13,
       position: position,
     });
+
+    this.spawnPosition = position.clone();
+
+    this.isSpooked = false; // New flag to indicate if the ghost is spooked (movement disabled)
+    this.timeSpooked = 0; // Variable to keep track of the time the ghost was spooked
   }
 
   init = async (flipbookName) => {
@@ -33,9 +38,15 @@ class Ghost extends Enemy {
     });
     this.events.add('beginoverlap', (e) => {
       if (this.isScared) {
-        // Destroy the ghost if it's scared and collided with the Pacman
-        this.destroy();
-        console.log('Ghost destroyed by Pacman');
+        this.position = this.spawnPosition.clone();
+        this.data.isSpooked = true;
+        this.data.isScared = false;
+        console.log('Ghost moved to spawn position');
+        setTimeout(() => {
+          this.data.isSpooked = false;
+        }, 10000);
+
+
       } else {
         this.handleCollisionWithPacman();
       }
@@ -228,6 +239,11 @@ class Ghost extends Enemy {
 
   tick() {
     super.tick();
+
+    if (this.data.isSpooked) {
+      // If the ghost is spooked (movement disabled), do nothing
+      return;
+    }
 
     const tileSize = 50;
 

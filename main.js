@@ -60,9 +60,7 @@ function createMap() {
   }
 }
 
-const main = async () => {
-  await Engine.setup('./settings.hjson');
-
+export const loadMap = async () => {
 
   const { map } = await TileMap.LoadFromFile({ url: './level1.hjson' });
   map.createMap = createMap;
@@ -72,6 +70,37 @@ const main = async () => {
 
 
   Engine.gameLoop.data.map = map;
+
+}
+
+export const loadMap2 = async () => {
+
+  // Remove actors from level1 before loading level2
+  Engine.gameLoop.clear();
+
+
+  const { map } = await TileMap.LoadFromFile({ url: './level2.hjson' });
+  map.createMap = createMap;
+  map.isTileFree = isTileFree;
+
+  Engine.gameLoop.data.map = map;
+
+
+  await map.createMap();
+
+  await createPacman();
+  await createGhosts();
+  const ghost3 = new Ghost(V2(350, 300));
+  await ghost3.init('img/ghostMoving3.png');
+
+
+}
+
+const main = async () => {
+  await Engine.setup('./settings.hjson');
+
+  await loadMap();
+
 
 
   await createPacman();

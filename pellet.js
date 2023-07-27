@@ -3,6 +3,7 @@ import { Engine } from './engine/engine.js';
 import { Vector2 as Vec2, V2 } from './engine/types.js';
 import { Circle } from './engine/physics.js';
 import * as TGE from './engine/engine.js';
+import { loadMap2 } from './main.js';
 
 
 class Pellet extends Actor {
@@ -51,9 +52,12 @@ class Pellet extends Actor {
   triggerWinScenario() {
     console.log('Congratulations! You Win!');
     // Implement any win scenario actions here, such as showing a win screen or restarting the game.
-    alert('YOU WIN!')
-    location.reload();
+
+
+    // Load level2.hjson and switch to it when all pellets are collected
+    loadMap2();
   }
 }
+
 
 export { Pellet };

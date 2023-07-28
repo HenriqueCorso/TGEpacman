@@ -6,6 +6,15 @@ import * as TGE from './engine/engine.js';
 import { Flipbook } from './engine/flipbook.js';
 import { stopAndHideFlipbook, playAndShowFlipbook } from './pacman-utils.js';
 
+const GhostMovementOptions = {
+
+  1: { vec: V2(1, 0), dir: 2 },  // Check if the tile to the left is free and not the previous direction
+  2: { vec: V2(-1, 0), dir: 1 }, // Check if the tile to the right is free and not the previous direction
+  3: { vec: V2(0, 1), dir: 4 }, // Check if the tile above is free and not the previous direction
+  4: { vec: V2(0, -1), dir: 3 }, // Check if the tile below is free and not the previous direction
+
+}
+
 class Ghost extends Enemy {
   constructor(position) {
     super({
@@ -61,9 +70,11 @@ class Ghost extends Enemy {
     // ghost moving flipbook
     const ghostFB = new Flipbook({ dims: V2(3, 3), actor: this, fps: 10 });
     await ghostFB.loadAsAtlas(flipbookName);
+    ghostFB.addSequence({ name: 'GhostMovingRight', startFrame: 0, endFrame: 1, loop: true });
+    ghostFB.addSequence({ name: 'GhostMovingUp', startFrame: 2, endFrame: 3, loop: true });
+    ghostFB.addSequence({ name: 'GhostMovingLeft', startFrame: 4, endFrame: 5, loop: true });
+    ghostFB.addSequence({ name: 'GhostMovingDown', startFrame: 6, endFrame: 7, loop: true });
     ghostFB.addSequence({ name: 'GhostMoving', startFrame: 0, endFrame: 7, loop: true });
-    ghostFB.play('GhostMoving');
-
 
     // ghost1 scared flipbook
     const ghostFBS = new Flipbook({ dims: V2(3, 3), actor: this, fps: 10 });
@@ -74,29 +85,44 @@ class Ghost extends Enemy {
   handleCollisionWithPacman() {
     const player = Engine.gameLoop.findActorByName('pacman');
 
+    player.rotation = 0
+
     console.log('DEAD!');
     player.handleCollisionWithGhost(); // Call the method in the player class to handle collision
     // Stop and hide the player's normal flipbook
     stopAndHideFlipbook(player, 0);
     // Play and show the player's dead flipbook
     playAndShowFlipbook(player, 1, 'PacmanDead');
-
   }
 
   moveGhost() {
     // Move ghost in the chosen direction
     if (this.data.randomDirection === 1) {
-      this.position.x -= 1;
+      this.position.x -= 1; //left
+      playAndShowFlipbook(this, 0, 'GhostMovingLeft')
+
     } else if (this.data.randomDirection === 2) {
-      this.position.x += 1;
+      this.position.x += 1; //right
+      playAndShowFlipbook(this, 0, 'GhostMovingRight')
+
     } else if (this.data.randomDirection === 3) {
-      this.position.y -= 1;
+      this.position.y -= 1;//up
+      playAndShowFlipbook(this, 0, 'GhostMovingUp')
+
     } else if (this.data.randomDirection === 4) {
-      this.position.y += 1;
+      this.position.y += 1;//down
+      playAndShowFlipbook(this, 0, 'GhostMovingDown')
+
     }
   }
 
-
+  getValidDirections(map, tileSize) {
+    let result = [];
+    for (const [k, v] of Object.entries(GhostMovementOptions)) {
+      if (map.isTileFree(this.position, v.vec, tileSize) && this.data.previousDirection != k) result.push(v.dir);
+    }
+    return result;
+  }
 
   chooseDirection(behavior) {
     const map = this.owner.data.map;
@@ -105,27 +131,8 @@ class Ghost extends Enemy {
     const player = Engine.gameLoop.findActorByName('pacman');
     const playerPosition = player.position;
 
-    let validDirections = [];
+    let validDirections = this.getValidDirections(map, tileSize);
 
-    // Check if the tile to the left is free and not the previous direction
-    if (map.isTileFree(this.position, V2(-1, 0), tileSize) && this.data.previousDirection !== 2) {
-      validDirections.push(1); // Add direction "left"
-    }
-
-    // Check if the tile to the right is free and not the previous direction
-    if (map.isTileFree(this.position, V2(1, 0), tileSize) && this.data.previousDirection !== 1) {
-      validDirections.push(2); // Add direction "right"
-    }
-
-    // Check if the tile above is free and not the previous direction
-    if (map.isTileFree(this.position, V2(0, -1), tileSize) && this.data.previousDirection !== 4) {
-      validDirections.push(3); // Add direction "up"
-    }
-
-    // Check if the tile below is free and not the previous direction
-    if (map.isTileFree(this.position, V2(0, 1), tileSize) && this.data.previousDirection !== 3) {
-      validDirections.push(4); // Add direction "down"
-    }
 
     // Choose a random valid direction from all available directions
     if (behavior === 'random') {

@@ -117,15 +117,10 @@ class Pacman extends Player {
     if (Vec2.IsEqual(oldPos, this.position, 0.5)) this.data.desiredDirection = -1;
 
     if (this.data.desiredDirection !== -1) {
-      if (this.data.desiredDirection === 2) {
-        this.rotation = 0;
-      } else if (this.data.desiredDirection === 1) {
-        this.rotation = Math.PI;
-      } else if (this.data.desiredDirection === 4) {
-        this.rotation = Math.PI / 2;
-      } else if (this.data.desiredDirection === 3) {
-        this.rotation = -Math.PI / 2;
-      }
+      if (this.data.desiredDirection === 2) return this.rotation = 0;
+      if (this.data.desiredDirection === 1) return this.rotation = Math.PI;
+      if (this.data.desiredDirection === 4) return this.rotation = Math.PI / 2;
+      if (this.data.desiredDirection === 3) return this.rotation = -Math.PI / 2;
     }
   }
 

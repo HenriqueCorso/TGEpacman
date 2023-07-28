@@ -54,6 +54,7 @@ function createMap() {
       }
 
       Engine.addActor(actor); // Add the actor to the engine
+      Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
 
     }
   }
@@ -67,8 +68,13 @@ export const loadMap = async () => {
 
   map.createMap();
 
+  await createPacman();
+  await createGhosts();
 
   Engine.gameLoop.data.map = map;
+
+  Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
+
 
 }
 
@@ -96,6 +102,8 @@ export const loadMap2 = async () => {
   await ghost2.init('img/ghostMoving2.png');
   await ghost3.init('img/ghostMoving3.png');
 
+  Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
+
 
 }
 
@@ -105,12 +113,6 @@ const main = async () => {
   await loadMap();
 
 
-
-  await createPacman();
-  await createGhosts();
-
-
-  Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
 
   Engine.gameLoop.tickRate = 120;
   Engine.start(tick);

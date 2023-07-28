@@ -6,7 +6,6 @@ import * as TGE from './engine/engine.js';
 import { Flipbook } from './engine/flipbook.js';
 import { stopAndHideFlipbook, playAndShowFlipbook } from './pacman-utils.js';
 
-
 class Ghost extends Enemy {
   constructor(position) {
     super({
@@ -16,9 +15,7 @@ class Ghost extends Enemy {
       scale: 0.13,
       position: position,
     });
-
     this.spawnPosition = position.clone();
-
     this.timeSpooked = 0; // Variable to keep track of the time the ghost was spooked
   }
 
@@ -40,10 +37,13 @@ class Ghost extends Enemy {
       if (this.isScared) {
         this.data.isSpooked = true;
         console.log('Ghost moved to spawn position');
-        setTimeout(() => {
-          this.data.isSpooked = false;
-        }, 5000);
 
+        Engine.gameLoop.addTimer({
+          duration: 120 * 5, // 5 seconds
+          onComplete: (e) => {
+            this.data.isSpooked = false;
+          },
+        });
 
       } else {
         this.handleCollisionWithPacman();
@@ -69,10 +69,7 @@ class Ghost extends Enemy {
     const ghostFBS = new Flipbook({ dims: V2(3, 3), actor: this, fps: 10 });
     await ghostFBS.loadAsAtlas('img/ghostMovingScared.png');
     ghostFBS.addSequence({ name: 'ScaredGhostMoving', startFrame: 0, endFrame: 7, loop: true });
-
-
   };
-
 
   handleCollisionWithPacman() {
     const player = Engine.gameLoop.findActorByName('pacman');
@@ -99,11 +96,16 @@ class Ghost extends Enemy {
     }
   }
 
-  chooseRandomDirection() {
+
+
+  chooseDirection(behavior) {
     const map = this.owner.data.map;
     const tileSize = 50;
 
-    const validDirections = [];
+    const player = Engine.gameLoop.findActorByName('pacman');
+    const playerPosition = player.position;
+
+    let validDirections = [];
 
     // Check if the tile to the left is free and not the previous direction
     if (map.isTileFree(this.position, V2(-1, 0), tileSize) && this.data.previousDirection !== 2) {
@@ -125,152 +127,84 @@ class Ghost extends Enemy {
       validDirections.push(4); // Add direction "down"
     }
 
-    // Choose a random valid direction
-    const randomDirectionIndex = Math.floor(Math.random() * validDirections.length);
-    this.data.randomDirection = validDirections[randomDirectionIndex];
-  }
+    // Choose a random valid direction from all available directions
+    if (behavior === 'random') {
+      const randomDirectionIndex = Math.floor(Math.random() * validDirections.length);
+      this.data.randomDirection = validDirections[randomDirectionIndex];
 
-  checkValidDirectionsTowardsPlayer() {
-    const map = this.owner.data.map;
-    const player = Engine.gameLoop.findActorByName('pacman');
-    const playerPosition = player.position;
+      // Choose a valid direction away from the player
+    } else if (behavior === 'awayFromPlayer') {
+      const validDirectionsAwayFromPlayer = validDirections.filter((dir) => {
+        if (dir === 1 && playerPosition.x > this.position.x) return true;
+        if (dir === 2 && playerPosition.x < this.position.x) return true;
+        if (dir === 3 && playerPosition.y > this.position.y) return true;
+        if (dir === 4 && playerPosition.y < this.position.y) return true;
+        return false;
+      });
 
-    const validDirectionsTowardsPlayer = [];
-    const tileSize = 50;
-
-    // Check if the tile to the left is free and not the previous direction
-    if (
-      map.isTileFree(this.position, V2(-1, 0), tileSize) &&
-      this.data.previousDirection !== 2 &&
-      playerPosition.x < this.position.x
-    ) {
-      validDirectionsTowardsPlayer.push(1); // Add direction "left"
-    }
-
-    // Check if the tile to the right is free and not the previous direction
-    if (
-      map.isTileFree(this.position, V2(1, 0), tileSize) &&
-      this.data.previousDirection !== 1 &&
-      playerPosition.x > this.position.x
-    ) {
-      validDirectionsTowardsPlayer.push(2); // Add direction "right"
-    }
-
-    // Check if the tile above is free and not the previous direction
-    if (
-      map.isTileFree(this.position, V2(0, -1), tileSize) &&
-      this.data.previousDirection !== 4 &&
-      playerPosition.y < this.position.y
-    ) {
-      validDirectionsTowardsPlayer.push(3); // Add direction "up"
-    }
-
-    // Check if the tile below is free and not the previous direction
-    if (
-      map.isTileFree(this.position, V2(0, 1), tileSize) &&
-      this.data.previousDirection !== 3 &&
-      playerPosition.y > this.position.y
-    ) {
-      validDirectionsTowardsPlayer.push(4); // Add direction "down"
-    }
-
-    return validDirectionsTowardsPlayer;
-  }
-
-  moveAwayFromPlayer() {
-    const map = this.owner.data.map;
-    const player = Engine.gameLoop.findActorByName('pacman');
-    const playerPosition = player.position;
-
-    const validDirectionsAwayFromPlayer = [];
-    const tileSize = 50;
-
-    // Check if the tile to the left is free and not the previous direction
-    if (
-      map.isTileFree(this.position, V2(-1, 0), tileSize) &&
-      this.data.previousDirection !== 2 &&
-      playerPosition.x > this.position.x
-    ) {
-      validDirectionsAwayFromPlayer.push(1); // Add direction "left"
-    }
-
-    // Check if the tile to the right is free and not the previous direction
-    if (
-      map.isTileFree(this.position, V2(1, 0), tileSize) &&
-      this.data.previousDirection !== 1 &&
-      playerPosition.x < this.position.x
-    ) {
-      validDirectionsAwayFromPlayer.push(2); // Add direction "right"
-    }
-
-    // Check if the tile above is free and not the previous direction
-    if (
-      map.isTileFree(this.position, V2(0, -1), tileSize) &&
-      this.data.previousDirection !== 4 &&
-      playerPosition.y > this.position.y
-    ) {
-      validDirectionsAwayFromPlayer.push(3); // Add direction "up"
-    }
-
-    // Check if the tile below is free and not the previous direction
-    if (
-      map.isTileFree(this.position, V2(0, 1), tileSize) &&
-      this.data.previousDirection !== 3 &&
-      playerPosition.y < this.position.y
-    ) {
-      validDirectionsAwayFromPlayer.push(4); // Add direction "down"
-    }
-
-    // If there are valid directions to move away from the player
-    if (validDirectionsAwayFromPlayer.length > 0) {
-      // Choose a random valid direction to move away from the player
-      const randomDirectionIndex = Math.floor(Math.random() * validDirectionsAwayFromPlayer.length);
-      this.data.randomDirection = validDirectionsAwayFromPlayer[randomDirectionIndex];
-    } else {
-      // If there are no valid directions to move away from the player,
-      // simply choose a random direction to move (similar to the previous behavior)
-      this.chooseRandomDirection();
-    }
-  }
-
-  moveGhostToSpawnPosition() {
-    const tileSize = 50;
-    const stepsPerTick = this.data.isSpooked ? 2 : 1; // Increase the steps per tick when spooked
-
-    for (let i = 0; i < stepsPerTick; i++) {
-      const currentPosition = this.position.clone();
-      const targetPosition = this.spawnPosition.clone();
-
-      // Calculate the difference between the current position and the target position
-      const diffX = targetPosition.x - currentPosition.x;
-      const diffY = targetPosition.y - currentPosition.y;
-
-      // Check if the ghost is already close to the target position
-      if (Math.abs(diffX) < tileSize / 2 && Math.abs(diffY) < tileSize / 2) {
-        // If the ghost is close enough, snap it to the target position
-        this.position = targetPosition.clone();
-        return;
+      if (validDirectionsAwayFromPlayer.length > 0) {
+        validDirections = validDirectionsAwayFromPlayer;
       }
+      // Choose a valid direction toeward the player
+    } else if (behavior === 'towardsPlayer') {
+      const validDirectionsTowardsPlayer = validDirections.filter((dir) => {
+        if (dir === 1 && playerPosition.x < this.position.x) return true;
+        if (dir === 2 && playerPosition.x > this.position.x) return true;
+        if (dir === 3 && playerPosition.y < this.position.y) return true;
+        if (dir === 4 && playerPosition.y > this.position.y) return true;
+        return false;
+      });
 
-      // Otherwise, move the ghost towards the target position
-      if (Math.abs(diffX) > Math.abs(diffY)) {
-        // Move horizontally first
-        this.position.x += diffX > 0 ? 1 : -1;
-      } else {
-        // Move vertically first
-        this.position.y += diffY > 0 ? 1 : -1;
+      if (validDirectionsTowardsPlayer.length > 0) {
+        validDirections = validDirectionsTowardsPlayer;
+      }
+    } else if (behavior === 'moveToSpawnPosition') {
+      // Move towards the spawn position of the ghost
+      const stepsPerTick = this.data.isSpooked ? 2 : 1; // Increase the steps per tick when spooked
+
+      for (let i = 0; i < stepsPerTick; i++) {
+        const currentPosition = this.position.clone();
+        const targetPosition = this.spawnPosition.clone();
+
+        // Calculate the difference between the current position and the target position
+        const diffX = targetPosition.x - currentPosition.x;
+        const diffY = targetPosition.y - currentPosition.y;
+
+        // Check if the ghost is already close to the target position
+        if (Math.abs(diffX) < tileSize / 2 && Math.abs(diffY) < tileSize / 2) {
+          // If the ghost is close enough, snap it to the target position
+          this.position = targetPosition.clone();
+          return;
+        }
+
+        // Otherwise, move the ghost towards the target position
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+          // Move horizontally first
+          this.position.x += diffX > 0 ? 1 : -1;
+        } else {
+          // Move vertically first
+          this.position.y += diffY > 0 ? 1 : -1;
+        }
       }
     }
+
+    // Choose a random valid direction (if not already chosen in the 'random' behavior)
+    if (this.data.randomDirection === undefined || behavior !== 'random') {
+      const randomDirectionIndex = Math.floor(Math.random() * validDirections.length);
+      this.data.randomDirection = validDirections[randomDirectionIndex];
+    }
+
+    // Update previous direction
+    this.data.previousDirection = this.data.randomDirection;
   }
 
 
   tick() {
     super.tick();
 
-
     if (this.data.isSpooked) {
-      // If the ghost is spooked (movement disabled), move it quickly to the spawn position
-      this.moveGhostToSpawnPosition();
+      // If the ghost is spooked, move it quickly to the spawn position
+      this.chooseDirection('moveToSpawnPosition');
       return;
     }
 
@@ -281,31 +215,21 @@ class Ghost extends Enemy {
 
     // Rule #1 ghost is allowed to change direction only when it's in the middle of a tile
     if (isGhostMiddleOfTile) {
-      const moveTowardsPlayer = Math.random() < 0.5; // 50% chance to move towards the player
+      const moveTowardsPlayer = Math.random() < 0.6; // 60% chance to move towards the player
 
       if (this.isScared) {
-        this.moveAwayFromPlayer();
+        this.chooseDirection('awayFromPlayer');
       } else {
         if (moveTowardsPlayer) {
-          const validDirectionsTowardsPlayer = this.checkValidDirectionsTowardsPlayer();
-
-          if (validDirectionsTowardsPlayer.length > 0) {
-            const randomDirectionIndex = Math.floor(Math.random() * validDirectionsTowardsPlayer.length);
-            this.data.randomDirection = validDirectionsTowardsPlayer[randomDirectionIndex];
-          } else {
-            this.chooseRandomDirection();
-          }
+          this.chooseDirection('towardsPlayer');
         } else {
-          this.chooseRandomDirection();
+          this.chooseDirection('random');
         }
       }
     }
 
     this.moveGhost();
-
-    // Update previous direction
-    this.data.previousDirection = this.data.randomDirection;
   }
 }
 
-export { Ghost };
+export { Ghost }; 

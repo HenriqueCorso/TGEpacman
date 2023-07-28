@@ -69,16 +69,20 @@ class Pacman extends Player {
         // Disable movement when the player loses a life
         this.canMove = false;
 
-        setTimeout(() => {
-          this.position = V2(50, 50);
-          this.data.isRespawning = false;
-          this.flags.isVisible = true;
+        Engine.gameLoop.addTimer({
+          duration: 120 * 2, // 2 seconds
+          onComplete: (e) => {
+            this.position = V2(50, 50);
+            this.data.isRespawning = false;
+            this.flags.isVisible = true;
 
-          stopAndHideFlipbook(player, 1);
-          playAndShowFlipbook(player, 0, 'PacmanMoving');
+            stopAndHideFlipbook(player, 1);
+            playAndShowFlipbook(player, 0, 'PacmanMoving');
 
-          this.canMove = true;
-        }, 2000);
+            this.canMove = true;
+          },
+        });
+
       }
     }
   }

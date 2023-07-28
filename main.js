@@ -54,6 +54,7 @@ function createMap() {
       }
 
       Engine.addActor(actor); // Add the actor to the engine
+
       Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
 
     }
@@ -74,7 +75,6 @@ export const loadMap = async () => {
   Engine.gameLoop.data.map = map;
 
   Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
-
 
 }
 
@@ -111,8 +111,6 @@ const main = async () => {
   await Engine.setup('./settings.hjson');
 
   await loadMap();
-
-
 
   Engine.gameLoop.tickRate = 120;
   Engine.start(tick);

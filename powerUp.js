@@ -41,33 +41,35 @@ class PowerUp extends Actor {
   }
 
   onPowerUpCollected() {
-    // Remove the pellet when the player overlaps with it
+    // Remove the power-up when the player overlaps with it
     this.destroy();
     console.log('PowerUp collected');
 
     // Set isScared flag to true for all ghosts
     const allGhosts = Engine.gameLoop.actors.filter((actor) => actor.name === 'ghost');
     allGhosts.forEach((ghost) => {
+      if (ghost.data.isSpooked) {
+        // If the ghost is already spooked (scared mode or disabled movement),
+        // do not modify its scared state or timers.
+        return;
+      }
+
       ghost.isScared = true;
       stopAndHideFlipbook(ghost, 0);
       playAndShowFlipbook(ghost, 1, 'ScaredGhostMoving');
-    });
 
-    // After 5 seconds, set isScared flag back to false for all ghosts
-    allGhosts.forEach((ghost) => {
+      // After 5 seconds, set isScared flag back to false for the ghost
       ghost.addTimer({
         duration: 120 * 5, // 5 seconds
         onComplete: (e) => {
           ghost.isScared = false;
-          console.log('Ghosts are back to normal');
+          console.log('Ghost is back to normal');
           stopAndHideFlipbook(ghost, 1);
           playAndShowFlipbook(ghost, 0, 'GhostMoving');
         },
       });
     });
   }
-
-
 }
 
 export { PowerUp };

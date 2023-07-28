@@ -21,15 +21,14 @@ const createPacman = async () => {
 };
 
 const createGhosts = async () => {
-  const ghost = new Ghost(V2(350, 300));
-  const ghost2 = new Ghost(V2(350, 300));
+  const ghost = new Ghost(V2(250, 300));
+  const ghost2 = new Ghost(V2(250, 300));
 
   await ghost.init('img/ghostMoving.png');
   await ghost2.init('img/ghostMoving2.png');
 };
 
 function createMap() {
-  // Load the map data from level1.hjson
 
   const tileSize = 50;
 
@@ -85,12 +84,16 @@ export const loadMap2 = async () => {
 
   Engine.gameLoop.data.map = map;
 
-
   await map.createMap();
 
   await createPacman();
-  await createGhosts();
-  const ghost3 = new Ghost(V2(350, 300));
+
+  const ghost = new Ghost(V2(450, 300));
+  const ghost2 = new Ghost(V2(450, 300));
+  const ghost3 = new Ghost(V2(450, 300));
+
+  await ghost.init('img/ghostMoving.png');
+  await ghost2.init('img/ghostMoving2.png');
   await ghost3.init('img/ghostMoving3.png');
 
 

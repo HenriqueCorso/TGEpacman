@@ -19,7 +19,6 @@ class Ghost extends Enemy {
 
     this.spawnPosition = position.clone();
 
-    this.isSpooked = false; // New flag to indicate if the ghost is spooked (movement disabled)
     this.timeSpooked = 0; // Variable to keep track of the time the ghost was spooked
   }
 
@@ -28,7 +27,8 @@ class Ghost extends Enemy {
     this.colliders.add(circleGhost);
     this.colliderType = 'Enemy';
 
-    this.data.isScared = false; // New flag to indicate if the ghost is scared
+    this.data.isScared = false; // New flag to indicate if the ghost is scared 
+    this.data.isSpooked = false; // New flag to indicate if the ghost is spooked (movement disabled)
 
     this.setCollisionResponseFlag({
       Consumable: TGE.Enum_HitTestMode.Ignore,
@@ -38,13 +38,11 @@ class Ghost extends Enemy {
     });
     this.events.add('beginoverlap', (e) => {
       if (this.isScared) {
-        this.position = this.spawnPosition.clone();
         this.data.isSpooked = true;
-        this.data.isScared = false;
         console.log('Ghost moved to spawn position');
         setTimeout(() => {
           this.data.isSpooked = false;
-        }, 10000);
+        }, 5000);
 
 
       } else {
@@ -235,13 +233,44 @@ class Ghost extends Enemy {
     }
   }
 
+  moveGhostToSpawnPosition() {
+    const tileSize = 50;
+    const stepsPerTick = this.data.isSpooked ? 2 : 1; // Increase the steps per tick when spooked
+
+    for (let i = 0; i < stepsPerTick; i++) {
+      const currentPosition = this.position.clone();
+      const targetPosition = this.spawnPosition.clone();
+
+      // Calculate the difference between the current position and the target position
+      const diffX = targetPosition.x - currentPosition.x;
+      const diffY = targetPosition.y - currentPosition.y;
+
+      // Check if the ghost is already close to the target position
+      if (Math.abs(diffX) < tileSize / 2 && Math.abs(diffY) < tileSize / 2) {
+        // If the ghost is close enough, snap it to the target position
+        this.position = targetPosition.clone();
+        return;
+      }
+
+      // Otherwise, move the ghost towards the target position
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        // Move horizontally first
+        this.position.x += diffX > 0 ? 1 : -1;
+      } else {
+        // Move vertically first
+        this.position.y += diffY > 0 ? 1 : -1;
+      }
+    }
+  }
 
 
   tick() {
     super.tick();
 
+
     if (this.data.isSpooked) {
-      // If the ghost is spooked (movement disabled), do nothing
+      // If the ghost is spooked (movement disabled), move it quickly to the spawn position
+      this.moveGhostToSpawnPosition();
       return;
     }
 

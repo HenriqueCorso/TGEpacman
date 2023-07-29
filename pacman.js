@@ -30,12 +30,12 @@ class Pacman extends Player {
 
     this.flags.isFlipbookEnabled = true;
 
-    const pacmanFB = new Flipbook({ dims: V2(4, 4), actor: this, fps: 10 });
+    const pacmanFB = new Flipbook({ dims: V2(4, 4), actor: this, fps: 8 });
     await pacmanFB.loadAsAtlas('img/pacmanMoving.png');
     pacmanFB.addSequence({ name: 'PacmanMoving', startFrame: 0, endFrame: 15, loop: true });
     pacmanFB.play('PacmanMoving');
 
-    const pacmanDFB = new Flipbook({ dims: V2(5, 4), actor: this, fps: 10 });
+    const pacmanDFB = new Flipbook({ dims: V2(5, 4), actor: this, fps: 8 });
     await pacmanDFB.loadAsAtlas('img/pacmanDead.png');
     pacmanDFB.addSequence({ name: 'PacmanDead', startFrame: 0, endFrame: 17, loop: false });
   };
@@ -70,7 +70,7 @@ class Pacman extends Player {
         this.canMove = false;
 
         Engine.gameLoop.addTimer({
-          duration: 120 * 2, // 2 seconds
+          duration: 120 * 3, // 3 seconds
           onComplete: (e) => {
             this.position = V2(50, 50);
             this.data.isRespawning = false;

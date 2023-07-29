@@ -7,6 +7,8 @@ import { TileMap } from './engine/tileMap.js';
 import { Obstacle } from './obstacle.js';
 import { Pellet } from './pellet.js';
 import { PowerUp } from './powerUp.js';
+import { InitAudio } from './engine/audio.js';
+
 
 const Engine = TGE.Engine;
 
@@ -111,6 +113,11 @@ const main = async () => {
   await Engine.setup('./settings.hjson');
 
   await loadMap();
+
+  const audio = InitAudio(Engine);
+  const data = await audio.loadFromFile('./sfx/sounds.hjson');
+  await audio.addBunch(data);
+  const start = await audio.spawn('start', true);
 
   Engine.gameLoop.tickRate = 120;
   Engine.start(tick);

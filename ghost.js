@@ -45,6 +45,8 @@ class Ghost extends Enemy {
     this.events.add('beginoverlap', (e) => {
       if (this.isScared) {
         this.data.isSpooked = true;
+        Engine.audio.spawn(`eatGhost`, true);
+
         console.log('Ghost moved to spawn position');
 
         Engine.gameLoop.addTimer({
@@ -84,8 +86,10 @@ class Ghost extends Enemy {
 
   handleCollisionWithPacman() {
     const player = Engine.gameLoop.findActorByName('pacman');
-
     player.rotation = 0
+
+    Engine.audio.spawn(`pacmanDeath`, true);
+
 
     console.log('DEAD!');
     player.handleCollisionWithGhost(); // Call the method in the player class to handle collision

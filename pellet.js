@@ -4,6 +4,7 @@ import { Vector2 as Vec2, V2 } from './engine/types.js';
 import { Circle } from './engine/physics.js';
 import * as TGE from './engine/engine.js';
 import { loadMap2 } from './main.js';
+import { InitAudio } from './engine/audio.js';
 
 
 class Pellet extends Actor {
@@ -42,6 +43,11 @@ class Pellet extends Actor {
     this.destroy();
     console.log('Pellet collected');
     Pellet.collectedPellets++;
+
+    // Play munch sound when a pellet is collected
+    const soundIndex = Math.floor(Math.random() * 2) + 1; // Randomly choose between "munch1" and "munch2" sounds
+    Engine.audio.spawn(`munch${soundIndex}`, { pan: 0 });
+
 
     // Check if all the pellets are collected
     if (Pellet.collectedPellets === Pellet.totalPellets) {

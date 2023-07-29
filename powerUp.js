@@ -44,6 +44,8 @@ class PowerUp extends Actor {
     // Remove the power-up when the player overlaps with it
     this.destroy();
     console.log('PowerUp collected');
+    Engine.audio.spawn(`powerUp`, true);
+
 
     // Set isScared flag to true for all ghosts
     const allGhosts = Engine.gameLoop.actors.filter((actor) => actor.name === 'ghost');

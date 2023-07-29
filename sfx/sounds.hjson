@@ -1,0 +1,32 @@
+[
+    {
+        name : start
+        url  : sfx/game_start.wav
+        volume : 0.5
+    }
+    {
+        name : pacmanDeath
+        url  : sfx/death_1.wav
+        volume : 0.5
+    }
+    {
+        name : munch1
+        url  : sfx/munch_1.wav
+        volume : 0.5
+    }
+     {
+        name : munch2
+        url  : sfx/munch_2.wav
+        volume : 0.5
+    }
+     {
+        name : powerUp
+        url  : sfx/power_pellet.wav
+        volume : 0.5
+    }
+    {
+        name : eatGhost
+        url  : sfx/eat_ghost.wav
+        volume : 0.5
+    }
+]

@@ -68,7 +68,7 @@ class Ghost extends Enemy {
 
 
     // ghost moving flipbook
-    const ghostFB = new Flipbook({ dims: V2(3, 3), actor: this, fps: 10 });
+    const ghostFB = new Flipbook({ dims: V2(3, 3), actor: this, fps: 8 });
     await ghostFB.loadAsAtlas(flipbookName);
     ghostFB.addSequence({ name: 'GhostMovingRight', startFrame: 0, endFrame: 1, loop: true });
     ghostFB.addSequence({ name: 'GhostMovingUp', startFrame: 2, endFrame: 3, loop: true });
@@ -77,7 +77,7 @@ class Ghost extends Enemy {
     ghostFB.addSequence({ name: 'GhostMoving', startFrame: 0, endFrame: 7, loop: true });
 
     // ghost1 scared flipbook
-    const ghostFBS = new Flipbook({ dims: V2(3, 3), actor: this, fps: 10 });
+    const ghostFBS = new Flipbook({ dims: V2(3, 3), actor: this, fps: 8 });
     await ghostFBS.loadAsAtlas('img/ghostMovingScared.png');
     ghostFBS.addSequence({ name: 'ScaredGhostMoving', startFrame: 0, endFrame: 7, loop: true });
   };

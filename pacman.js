@@ -90,7 +90,7 @@ class Pacman extends Player {
   handlePlayerMovement() {
     const map = this.owner.data.map;
     const keys = this.controllers['keyboard'].keyState;
-    const tileSize = 50;
+    const tileSize = this.owner.data.tileSize;
     const isPlayerMiddleOfTile = this.position.x % tileSize == 0 && this.position.y % tileSize == 0;
 
     if (!this.canMove) return;

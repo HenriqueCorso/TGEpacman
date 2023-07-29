@@ -22,15 +22,28 @@ const createPacman = async () => {
   await player.init();
 };
 
-const createGhosts = async () => {
-  const ghost = new Ghost(V2(250, 300));
-  const ghost2 = new Ghost(V2(250, 300));
+const createGhosts = async (mapName) => {
+  if (mapName == 'level1.hjson') {
+    const ghost = new Ghost(V2(250, 300));
+    const ghost2 = new Ghost(V2(250, 300));
 
-  await ghost.init('img/ghostMoving.png');
-  await ghost2.init('img/ghostMoving2.png');
+    await ghost.init('img/ghostMoving.png');
+    await ghost2.init('img/ghostMoving2.png');
+
+  } else if (mapName == 'level2.hjson') {
+    const ghost = new Ghost(V2(450, 300));
+    const ghost2 = new Ghost(V2(450, 300));
+    const ghost3 = new Ghost(V2(450, 300));
+
+    await ghost.init('img/ghostMoving.png');
+    await ghost2.init('img/ghostMoving2.png');
+    await ghost3.init('img/ghostMoving3.png');
+  }
 };
 
 function createMap() {
+
+  Engine.gameLoop.data.tileSize = 50;
 
   const tileSize = 50;
 
@@ -57,72 +70,45 @@ function createMap() {
 
       Engine.addActor(actor); // Add the actor to the engine
 
-      Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
 
     }
   }
 }
 
-export const loadMap = async () => {
+export const loadMap = async (mapPath) => {
 
-  const { map } = await TileMap.LoadFromFile({ url: './level1.hjson' });
-  map.createMap = createMap;
-  map.isTileFree = isTileFree;
 
-  map.createMap();
-
-  await createPacman();
-  await createGhosts();
-
-  Engine.gameLoop.data.map = map;
-
-  Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
-
-}
-
-export const loadMap2 = async () => {
-
-  // Remove actors from level1 before loading level2
   Engine.gameLoop.clear();
 
-
-  const { map } = await TileMap.LoadFromFile({ url: './level2.hjson' });
+  const { map } = await TileMap.LoadFromFile({ url: mapPath });
   map.createMap = createMap;
   map.isTileFree = isTileFree;
 
   Engine.gameLoop.data.map = map;
+  Engine.gameLoop.data.url = mapPath
 
   await map.createMap();
 
   await createPacman();
-
-  const ghost = new Ghost(V2(450, 300));
-  const ghost2 = new Ghost(V2(450, 300));
-  const ghost3 = new Ghost(V2(450, 300));
-
-  await ghost.init('img/ghostMoving.png');
-  await ghost2.init('img/ghostMoving2.png');
-  await ghost3.init('img/ghostMoving3.png');
+  await createGhosts(mapPath); // Pass the map name to createGhosts
 
   Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
-
-
 }
+
 
 const main = async () => {
   await Engine.setup('./settings.hjson');
-
-  await loadMap();
 
   const audio = InitAudio(Engine);
   const data = await audio.loadFromFile('./sfx/sounds.hjson');
   await audio.addBunch(data);
   const start = await audio.spawn('start', true);
 
+  await loadMap('level1.hjson'); // Load the initial map
+
   Engine.gameLoop.tickRate = 120;
   Engine.start(tick);
 
-  Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
 
 };
 

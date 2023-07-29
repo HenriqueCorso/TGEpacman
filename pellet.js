@@ -3,7 +3,7 @@ import { Engine } from './engine/engine.js';
 import { Vector2 as Vec2, V2 } from './engine/types.js';
 import { Circle } from './engine/physics.js';
 import * as TGE from './engine/engine.js';
-import { loadMap2 } from './main.js';
+import { loadMap } from './main.js';
 import { InitAudio } from './engine/audio.js';
 
 
@@ -59,11 +59,19 @@ class Pellet extends Actor {
     console.log('Congratulations! You Win!');
     // Implement any win scenario actions here, such as showing a win screen or restarting the game.
 
-
-    // Load level2.hjson and switch to it when all pellets are collected
-    loadMap2();
+    // Check the current level and load the appropriate level
+    const currentLevel = Engine.gameLoop.data.url;
+    if (currentLevel === 'level1.hjson') {
+      loadMap('level2.hjson');
+    } else if (currentLevel === 'level2.hjson') {
+      loadMap('level3.hjson');
+    } else {
+      console.log('All levels completed!');
+      // Implement any actions for completing all levels here, such as showing a game completed screen.
+    }
   }
 }
 
-
 export { Pellet };
+
+

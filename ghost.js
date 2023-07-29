@@ -130,7 +130,7 @@ class Ghost extends Enemy {
 
   chooseDirection(behavior) {
     const map = this.owner.data.map;
-    const tileSize = 50;
+    const tileSize = this.owner.data.tileSize;
 
     const player = Engine.gameLoop.findActorByName('pacman');
     const playerPosition = player.position;
@@ -219,7 +219,7 @@ class Ghost extends Enemy {
       return;
     }
 
-    const tileSize = 50;
+    const tileSize = this.owner.data.tileSize;
 
     // Check if ghost is in the middle of a tile
     const isGhostMiddleOfTile = this.position.x % tileSize === 0 && this.position.y % tileSize === 0;

@@ -115,6 +115,8 @@ const main = async () => {
   Engine.gameLoop.tickRate = 120;
   Engine.start(tick);
 
+  Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
+
 };
 
 

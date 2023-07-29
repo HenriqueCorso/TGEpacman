@@ -25,7 +25,7 @@ export const stopAndHideFlipbook = (actor, flipbookIndex) => {
 export const playAndShowFlipbook = (actor, flipbookIndex, sequenceName) => {
   const fb = actor?.flipbooks[flipbookIndex];
   if (!fb) return;
-  fb.play(sequenceName);
+  fb.play(sequenceName, true);
   fb.isVisible = true;
 };
 

@@ -15,6 +15,7 @@ class Pacman extends Player {
       scale: 0.2,
       position: V2(50, 50),
       rotation: Math.PI,
+      zIndex: 1
     });
 
     this.canMove = true; // Add a flag to indicate if the player can move

@@ -9,7 +9,6 @@ import { Pellet } from './pellet.js';
 import { PowerUp } from './powerUp.js';
 import { InitAudio } from './engine/audio.js';
 
-
 const Engine = TGE.Engine;
 
 const tick = () => {
@@ -93,7 +92,38 @@ export const loadMap = async (mapPath) => {
   await createGhosts(mapPath); // Pass the map name to createGhosts
 
   Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
+  Engine.gameLoop.add('custom', { update, zIndex: 2 });
+
 }
+
+
+
+const update = () => {
+  const player = Engine.gameLoop.findActorByName('pacman');
+  const pellet = Engine.gameLoop.findActorByName('pellet');
+
+
+  let score = pellet.data.score
+  let lives = player.data.lives
+
+  Engine.renderingSurface.resetTransform();
+
+  // Display score
+  Engine.renderingSurface.textOut(V2(10, 20), `Score: ${score}`, {
+    color: 'white',
+    font: '20px Arial',
+  });
+
+  // Display lives
+  Engine.renderingSurface.textOut(V2(200, 20), `Lives: ${lives}`, {
+    color: 'white',
+    font: '20px Arial',
+  });
+}
+
+
+// Add the custom score layer to the GameLoop with the appropriate zIndex
+
 
 
 const main = async () => {

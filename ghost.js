@@ -23,6 +23,7 @@ class Ghost extends Enemy {
       hasColliders: true,
       scale: 0.13,
       position: position,
+      zIndex: 1
     });
     this.spawnPosition = position.clone();
     this.timeSpooked = 0; // Variable to keep track of the time the ghost was spooked

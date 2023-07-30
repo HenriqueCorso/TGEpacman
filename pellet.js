@@ -13,6 +13,7 @@ class Pellet extends Actor {
 
   constructor(position) {
     super({
+      name: 'pellet',
       owner: Engine.gameLoop,
       hasColliders: true,
       imgUrl: 'img/pellet.png',
@@ -20,6 +21,9 @@ class Pellet extends Actor {
       position: position,
       zIndex: 0,
     });
+    this.data.score = 0;
+
+    console.log(this.data.score)
 
     const circlePellet = new Circle(V2(0, 0), 10);
     this.colliders.add(circlePellet);
@@ -39,10 +43,15 @@ class Pellet extends Actor {
   }
 
   collect() {
+
     // Remove the pellet when the player overlaps with it
     this.destroy();
     console.log('Pellet collected');
     Pellet.collectedPellets++;
+
+    this.data.score += 10;
+
+    console.log(this.data.score);
 
     // Play munch sound when a pellet is collected
     const soundIndex = Math.floor(Math.random() * 2) + 1; // Randomly choose between "munch1" and "munch2" sounds

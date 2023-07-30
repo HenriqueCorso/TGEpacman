@@ -7,12 +7,10 @@ import { Flipbook } from './engine/flipbook.js';
 import { stopAndHideFlipbook, playAndShowFlipbook } from './pacman-utils.js';
 
 const GhostMovementOptions = {
-
   1: { vec: V2(1, 0), dir: 2 },  // Check if the tile to the left is free and not the previous direction
   2: { vec: V2(-1, 0), dir: 1 }, // Check if the tile to the right is free and not the previous direction
   3: { vec: V2(0, 1), dir: 4 }, // Check if the tile above is free and not the previous direction
   4: { vec: V2(0, -1), dir: 3 }, // Check if the tile below is free and not the previous direction
-
 }
 
 class Ghost extends Enemy {
@@ -43,24 +41,8 @@ class Ghost extends Enemy {
       Player: TGE.Enum_HitTestMode.Overlap,
       Obstacle: TGE.Enum_HitTestMode.Ignore,
     });
-    this.events.add('beginoverlap', (e) => {
-      if (this.isScared) {
-        this.data.isSpooked = true;
-        Engine.audio.spawn(`eatGhost`, true);
 
-        console.log('Ghost moved to spawn position');
-
-        Engine.gameLoop.addTimer({
-          duration: 120 * 5, // 5 seconds
-          onComplete: (e) => {
-            this.data.isSpooked = false;
-          },
-        });
-
-      } else {
-        this.handleCollisionWithPacman();
-      }
-    });
+    this.events.add('beginoverlap', this.handleBeginOverlap);
 
     this.data.randomDirection = 0;
     this.data.previousDirection = 0;
@@ -68,7 +50,6 @@ class Ghost extends Enemy {
     Engine.addActor(this);
 
     this.flags.isFlipbookEnabled = true;
-
 
     // ghost moving flipbook
     const ghostFB = new Flipbook({ dims: V2(3, 3), actor: this, fps: 8 });
@@ -83,6 +64,25 @@ class Ghost extends Enemy {
     const ghostFBS = new Flipbook({ dims: V2(3, 3), actor: this, fps: 8 });
     await ghostFBS.loadAsAtlas('img/ghostMovingScared.png');
     ghostFBS.addSequence({ name: 'ScaredGhostMoving', startFrame: 0, endFrame: 7, loop: true });
+  };
+
+  handleBeginOverlap = (e) => {
+    if (this.isScared && !this.data.isSpooked) { // Check if the ghost is scared and not spooked
+      this.data.isSpooked = true;
+      Engine.data.score += 50; // Increase the score only when the ghost is eaten
+      Engine.audio.spawn(`eatGhost`, true);
+
+      console.log('Ghost moved to spawn position');
+
+      Engine.gameLoop.addTimer({
+        duration: 120 * 5, // 5 seconds
+        onComplete: (e) => {
+          this.data.isSpooked = false;
+        },
+      });
+    } else {
+      this.handleCollisionWithPacman(); // Handle collision with Pacman when the ghost is not scared or when it is spooked
+    }
   };
 
   handleCollisionWithPacman() {
@@ -210,12 +210,14 @@ class Ghost extends Enemy {
     this.data.previousDirection = this.data.randomDirection;
   }
 
-
   tick() {
     super.tick();
 
     if (this.data.isSpooked) {
-      // If the ghost is spooked, move it quickly to the spawn position
+      // If the ghost is spooked change the flipbook and move it quickly to the spawn position
+      this.isScared = false;
+      stopAndHideFlipbook(this, 1);
+      playAndShowFlipbook(this, 0, 'GhostMoving');
       this.chooseDirection('moveToSpawnPosition');
       return;
     }

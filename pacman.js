@@ -42,7 +42,6 @@ class Pacman extends Player {
   };
 
   initLifeSystem() {
-    this.data.lives = 3;
     this.data.isRespawning = false;
   }
 
@@ -57,8 +56,8 @@ class Pacman extends Player {
     const player = Engine.gameLoop.findActorByName('pacman');
 
     if (!this.data.isRespawning) {
-      this.data.lives--;
-      if (this.data.lives <= 0) {
+      Engine.data.lives--;
+      if (Engine.data.lives <= 0) {
         console.log('Game Over');
         alert('GameOver');
         location.reload();

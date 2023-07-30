@@ -13,7 +13,7 @@ const Engine = TGE.Engine;
 
 const tick = () => {
 
-};
+}
 
 const createPacman = async () => {
   const player = new Pacman();
@@ -69,13 +69,11 @@ function createMap() {
 
       Engine.addActor(actor); // Add the actor to the engine
 
-
     }
   }
 }
 
 export const loadMap = async (mapPath) => {
-
 
   Engine.gameLoop.clear();
 
@@ -96,15 +94,15 @@ export const loadMap = async (mapPath) => {
 
 }
 
-
+// Initialize the score and lives in the Engine's data object
+Engine.data.score = 0;
+Engine.data.lives = 3;
 
 const update = () => {
   const player = Engine.gameLoop.findActorByName('pacman');
-  const pellet = Engine.gameLoop.findActorByName('pellet');
 
-
-  let score = pellet.data.score
-  let lives = player.data.lives
+  let score = Engine.data.score
+  let lives = Engine.data.lives
 
   Engine.renderingSurface.resetTransform();
 
@@ -120,11 +118,6 @@ const update = () => {
     font: '20px Arial',
   });
 }
-
-
-// Add the custom score layer to the GameLoop with the appropriate zIndex
-
-
 
 const main = async () => {
   await Engine.setup('./settings.hjson');

@@ -6,7 +6,6 @@ import * as TGE from './engine/engine.js';
 import { loadMap } from './main.js';
 import { InitAudio } from './engine/audio.js';
 
-
 class Pellet extends Actor {
   static totalPellets = 0;
   static collectedPellets = 0;
@@ -21,9 +20,6 @@ class Pellet extends Actor {
       position: position,
       zIndex: 0,
     });
-    this.data.score = 0;
-
-    console.log(this.data.score)
 
     const circlePellet = new Circle(V2(0, 0), 10);
     this.colliders.add(circlePellet);
@@ -49,14 +45,11 @@ class Pellet extends Actor {
     console.log('Pellet collected');
     Pellet.collectedPellets++;
 
-    this.data.score += 10;
-
-    console.log(this.data.score);
+    Engine.data.score += 10;
 
     // Play munch sound when a pellet is collected
     const soundIndex = Math.floor(Math.random() * 2) + 1; // Randomly choose between "munch1" and "munch2" sounds
     Engine.audio.spawn(`munch${soundIndex}`, { pan: 0 });
-
 
     // Check if all the pellets are collected
     if (Pellet.collectedPellets === Pellet.totalPellets) {
@@ -82,5 +75,3 @@ class Pellet extends Actor {
 }
 
 export { Pellet };
-
-

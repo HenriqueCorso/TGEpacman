@@ -11,7 +11,8 @@ class Obstacle extends Actor {
       hasColliders: true,
       imgUrl: 'img/block.png',
       scale: 1.15,
-      position: position
+      position: position,
+      zIndex: 1
     });
 
     const boxObstacle = new Box(V2(0, 0), V2(45, 45));

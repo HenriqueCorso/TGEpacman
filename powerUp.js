@@ -46,7 +46,6 @@ class PowerUp extends Actor {
     console.log('PowerUp collected');
     Engine.audio.spawn(`powerUp`, true);
 
-
     // Set isScared flag to true for all ghosts
     const allGhosts = Engine.gameLoop.actors.filter((actor) => actor.name === 'ghost');
     allGhosts.forEach((ghost) => {

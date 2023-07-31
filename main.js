@@ -8,6 +8,7 @@ import { Obstacle } from './obstacle.js';
 import { Pellet } from './pellet.js';
 import { PowerUp } from './powerUp.js';
 import { InitAudio } from './engine/audio.js';
+import { Picture } from './engine/picture.js';
 
 const Engine = TGE.Engine;
 
@@ -98,6 +99,8 @@ export const loadMap = async (mapPath) => {
 Engine.data.score = 0;
 Engine.data.lives = 3;
 
+const icon = await Picture.LoadFromFile('img/pacmanIcon.png');
+
 const update = () => {
   const player = Engine.gameLoop.findActorByName('pacman');
 
@@ -106,17 +109,21 @@ const update = () => {
 
   Engine.renderingSurface.resetTransform();
 
-  // Display score
-  Engine.renderingSurface.textOut(V2(10, 20), `Score: ${score}`, {
+
+
+  Engine.renderingSurface.textOut(V2(40, 60), `Score: ${score}`, {
     color: 'white',
-    font: '20px Arial',
+    font: '20px led',
   });
 
-  // Display lives
-  Engine.renderingSurface.textOut(V2(200, 20), `Lives: ${lives}`, {
-    color: 'white',
-    font: '20px Arial',
-  });
+
+  // Draw pacman icons for lives
+  const iconSize = 20; // Adjust the size of the pacman icon 
+  const iconSpacing = 30; // Adjust the spacing between pacman icons 
+  for (let i = 0; i < lives; i++) {
+    const xPos = 40 + (i * (iconSize + iconSpacing));
+    Engine.renderingSurface.drawImage(V2(xPos, 610), icon.image);
+  }
 }
 
 const main = async () => {

@@ -6,7 +6,7 @@
     }
     {
         name : pacmanDeath
-        url  : sfx/death_1.wav
+        url  : sfx/death_1.mp3
         volume : 0.5
     }
     {

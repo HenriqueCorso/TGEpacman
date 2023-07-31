@@ -215,7 +215,6 @@ class Ghost extends Enemy {
 
     if (this.data.isSpooked) {
       // If the ghost is spooked change the flipbook and move it quickly to the spawn position
-      this.isScared = false;
       stopAndHideFlipbook(this, 1);
       playAndShowFlipbook(this, 0, 'GhostMoving');
       this.chooseDirection('moveToSpawnPosition');

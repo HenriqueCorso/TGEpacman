@@ -52,6 +52,10 @@ class Pacman extends Player {
     this.colliders.add(circlePlayer);
   }
 
+  resetPosition() {
+    this.position = this.spawnPosition.clone();
+  }
+
   handleCollisionWithGhost() {
     const player = Engine.gameLoop.findActorByName('pacman');
 
@@ -75,6 +79,13 @@ class Pacman extends Player {
             this.position = V2(50, 50);
             this.data.isRespawning = false;
             this.flags.isVisible = true;
+
+            const allGhosts = Engine.gameLoop.actors.filter((actor) => actor.name === 'ghost');
+            allGhosts.forEach((ghost) => {
+              ghost.position = ghost.spawnPosition.clone()
+
+            });
+
 
             stopAndHideFlipbook(player, 1);
             playAndShowFlipbook(player, 0, 'PacmanMoving');

@@ -13,8 +13,17 @@ import { Picture } from './engine/picture.js';
 const Engine = TGE.Engine;
 
 const tick = () => {
-
+  updateCamera();
 }
+
+const updateCamera = () => {
+  const player = Engine.gameLoop.findActorByName('pacman');
+  if (player) {
+    const cameraOffsetX = Engine.renderingSurface.canvas.width / 2 - player.position.x;
+    const cameraOffsetY = Engine.renderingSurface.canvas.height / 2 - player.position.y;
+    Engine.gameLoop.forActors(a => a.offset = V2(cameraOffsetX, cameraOffsetY));
+  }
+};
 
 const createPacman = async () => {
   const player = new Pacman();
@@ -109,9 +118,7 @@ const update = () => {
 
   Engine.renderingSurface.resetTransform();
 
-
-
-  Engine.renderingSurface.textOut(V2(40, 60), `Score: ${score}`, {
+  Engine.renderingSurface.textOut(V2(30, 30), ` ${score}`, {
     color: 'white',
     font: '20px led',
   });
@@ -134,7 +141,7 @@ const main = async () => {
   await audio.addBunch(data);
   const start = await audio.spawn('start', true);
 
-  await loadMap('level1.hjson'); // Load the initial map
+  await loadMap('level3.hjson'); // Load the initial map
 
   Engine.gameLoop.tickRate = 120;
   Engine.start(tick);

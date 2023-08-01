@@ -23,8 +23,12 @@ class Ghost extends Enemy {
       position: position,
       zIndex: 1
     });
+
     this.spawnPosition = position.clone();
     this.timeSpooked = 0; // Variable to keep track of the time the ghost was spooked
+    this.initialSpeed = 1; // Initial movement speed of the ghost
+    this.currentSpeed = this.initialSpeed; // Current movement speed of the ghost
+
   }
 
   init = async (flipbookName) => {
@@ -245,4 +249,4 @@ class Ghost extends Enemy {
   }
 }
 
-export { Ghost }; 
+export { Ghost };  

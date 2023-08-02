@@ -17,6 +17,7 @@ const tick = () => {
 
   updateScoreSound();
 
+
 }
 
 const updateScoreSound = () => {
@@ -37,22 +38,28 @@ const updateScoreSound = () => {
 }
 
 
-const playScoreSound = (score) => {
+const playScoreSound = async (score) => {
   let soundName;
 
   // Determine the sound to play based on the milestone reached
   if (score >= 1000 && score < 2000) {
     soundName = 'siren1';
   } else if (score >= 2000 && score < 3000) {
+    Engine.audio.tracks.siren1.instances.forEach(sfx => sfx.stop());
+
     soundName = 'siren2';
   } else if (score >= 3000 && score < 4000) {
+    Engine.audio.tracks.siren2.instances.forEach(sfx => sfx.stop());
+
     soundName = 'siren3';
   } else if (score >= 4000 && score < 5000) {
+    Engine.audio.tracks.siren3.instances.forEach(sfx => sfx.stop());
+
     soundName = 'siren4';
   }
   // Check if a valid sound name was determined and play the sound
   if (soundName) {
-    const sirens = Engine.audio.spawn(soundName, { loop: true })
+    const sirens = await Engine.audio.spawn(soundName, { loop: true })
   }
 };
 

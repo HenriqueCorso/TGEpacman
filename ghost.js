@@ -70,8 +70,10 @@ class Ghost extends Enemy {
     ghostFBS.addSequence({ name: 'ScaredGhostMoving', startFrame: 0, endFrame: 7, loop: true });
   };
 
+
+
   handleBeginOverlap = (e) => {
-    if (this.isScared && !this.data.isSpooked) { // Check if the ghost is scared and not spooked
+    if (this.isScared) { // Check if the ghost is scared and not spooked
       this.data.isSpooked = true;
       Engine.data.score += 50; // Increase the score only when the ghost is eaten
       Engine.audio.spawn(`eatGhost`, true);
@@ -226,14 +228,20 @@ class Ghost extends Enemy {
     }
 
     const tileSize = this.owner.data.tileSize;
-
-    // Check if ghost is in the middle of a tile
     const isGhostMiddleOfTile = this.position.x % tileSize === 0 && this.position.y % tileSize === 0;
+
+    // Get the current score from Engine's data object
+    const currentScore = Engine.data.score;
+
+    // Calculate the probability of moving towards the player
+    // Start with a base probability of 50% and increase it by 10% for every 1000 points scored
+    const baseProbability = 0.5;
+    const increasePer1000Points = 0.1;
+    const increaseChance = Math.floor(currentScore / 1000) * increasePer1000Points;
+    const moveTowardsPlayer = Math.random() < baseProbability + increaseChance;
 
     // Rule #1 ghost is allowed to change direction only when it's in the middle of a tile
     if (isGhostMiddleOfTile) {
-      const moveTowardsPlayer = Math.random() < 0.6; // 60% chance to move towards the player
-
       if (this.isScared) {
         this.chooseDirection('awayFromPlayer');
       } else {

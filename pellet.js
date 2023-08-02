@@ -49,13 +49,14 @@ class Pellet extends Actor {
 
     // Play munch sound when a pellet is collected
     const soundIndex = Math.floor(Math.random() * 2) + 1; // Randomly choose between "munch1" and "munch2" sounds
-    Engine.audio.spawn(`munch${soundIndex}`, { pan: 0 });
+    Engine.audio.spawn(`munch${soundIndex}`, true);
 
     // Check if all the pellets are collected
     if (Pellet.collectedPellets === Pellet.totalPellets) {
       this.triggerWinScenario();
     }
   }
+
 
   triggerWinScenario() {
     console.log('Congratulations! You Win!');

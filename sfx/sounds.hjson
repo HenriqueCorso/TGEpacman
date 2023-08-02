@@ -29,4 +29,24 @@
         url  : sfx/eat_ghost.wav
         volume : 0.5
     }
+        {
+        name : siren1
+        url  : sfx/siren_1.wav
+        volume : 1
+    }
+       {
+        name : siren2
+        url  : sfx/siren_2.wav
+        volume : 1
+    }
+       {
+        name : siren3
+        url  : sfx/siren_3.wav
+        volume : 1
+    }
+       {
+        name : siren4
+        url  : sfx/siren_4.wav
+        volume : 1
+    }
 ]

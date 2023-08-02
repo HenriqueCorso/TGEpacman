@@ -14,7 +14,47 @@ const Engine = TGE.Engine;
 
 const tick = () => {
   updateCamera();
+
+  updateScoreSound();
+
 }
+
+const updateScoreSound = () => {
+  // Get the current score from Engine's data object
+  const currentScore = Engine.data.score;
+
+  // Get the last played score milestone from Engine's data object 
+  let lastPlayedMilestone = Engine.data.lastPlayedMilestone || 0;
+
+  // Check if the current score has reached a new milestone (multiple of 1000)
+  if (currentScore > lastPlayedMilestone && currentScore % 1000 === 0) {
+    // Play a sound based on the milestone reached
+    playScoreSound(currentScore);
+
+    // Update the last played milestone to the current score
+    Engine.data.lastPlayedMilestone = currentScore;
+  }
+}
+
+
+const playScoreSound = (score) => {
+  let soundName;
+
+  // Determine the sound to play based on the milestone reached
+  if (score >= 1000 && score < 2000) {
+    soundName = 'siren1';
+  } else if (score >= 2000 && score < 3000) {
+    soundName = 'siren2';
+  } else if (score >= 3000 && score < 4000) {
+    soundName = 'siren3';
+  } else if (score >= 4000 && score < 5000) {
+    soundName = 'siren4';
+  }
+  // Check if a valid sound name was determined and play the sound
+  if (soundName) {
+    const sirens = Engine.audio.spawn(soundName, { loop: true })
+  }
+};
 
 const updateCamera = () => {
   const player = Engine.gameLoop.findActorByName('pacman');
@@ -47,6 +87,17 @@ const createGhosts = async (mapName) => {
     await ghost.init('img/ghostMoving.png');
     await ghost2.init('img/ghostMoving2.png');
     await ghost3.init('img/ghostMoving3.png');
+
+  } else if (mapName == 'level3.hjson') {
+    const ghost = new Ghost(V2(450, 400));
+    const ghost2 = new Ghost(V2(450, 400));
+    const ghost3 = new Ghost(V2(450, 400));
+    const ghost4 = new Ghost(V2(450, 400));
+
+    await ghost.init('img/ghostMoving.png');
+    await ghost2.init('img/ghostMoving2.png');
+    await ghost3.init('img/ghostMoving3.png');
+    await ghost4.init('img/ghostMoving4.png');
   }
 };
 
@@ -54,7 +105,7 @@ function createMap() {
 
   Engine.gameLoop.data.tileSize = 50;
 
-  const tileSize = 50;
+  const tileSize = Engine.gameLoop.data.tileSize;
 
   // Loop through the rows and columns of the tilemap
   for (let row = 0; row < this.height; row++) {
@@ -77,6 +128,7 @@ function createMap() {
           break;
       }
 
+      actor.flags.optimizeCollisionCHecks = false;
       Engine.addActor(actor); // Add the actor to the engine
 
     }
@@ -102,7 +154,9 @@ export const loadMap = async (mapPath) => {
   Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
   Engine.gameLoop.add('custom', { update, zIndex: 2 });
 
+
 }
+
 
 // Initialize the score and lives in the Engine's data object
 Engine.data.score = 0;
@@ -110,8 +164,10 @@ Engine.data.lives = 3;
 
 const icon = await Picture.LoadFromFile('img/pacmanIcon.png');
 
+
 const update = () => {
   const player = Engine.gameLoop.findActorByName('pacman');
+
 
   let score = Engine.data.score
   let lives = Engine.data.lives
@@ -133,6 +189,7 @@ const update = () => {
   }
 }
 
+
 const main = async () => {
   await Engine.setup('./settings.hjson');
 
@@ -141,7 +198,9 @@ const main = async () => {
   await audio.addBunch(data);
   const start = await audio.spawn('start', true);
 
-  await loadMap('level3.hjson'); // Load the initial map
+  playScoreSound();
+
+  await loadMap('level1.hjson'); // Load the initial map
 
   Engine.gameLoop.tickRate = 120;
   Engine.start(tick);

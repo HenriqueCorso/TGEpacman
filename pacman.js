@@ -24,6 +24,7 @@ class Pacman extends Player {
   init = async () => {
     Engine.addActor(this);
 
+
     this.initLifeSystem(); // Initialize the life system
     this.initColliders(); // Initialize colliders and movement
     this.attachKeyboard();
@@ -40,6 +41,8 @@ class Pacman extends Player {
     await pacmanDFB.loadAsAtlas('img/pacmanDead.png');
     pacmanDFB.addSequence({ name: 'PacmanDead', startFrame: 0, endFrame: 17, loop: false });
   };
+
+
 
   initLifeSystem() {
     this.data.isRespawning = false;

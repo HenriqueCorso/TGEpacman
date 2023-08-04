@@ -13,7 +13,6 @@ import { waitClick } from './engine/utils.js';
 
 const Engine = TGE.Engine;
 
-let currentLoopSound = null; // Keep track of the currently playing looped sound
 
 const tick = () => {
   updateCamera();
@@ -36,6 +35,8 @@ const updateScoreSound = () => {
     Engine.data.lastPlayedMilestone = currentScore;
   }
 }
+let currentLoopSound = null; // Keep track of the currently playing looped sound
+
 
 const playScoreSound = async (score) => {
   // Check if there's a currently playing looped sound, and stop it if it exists

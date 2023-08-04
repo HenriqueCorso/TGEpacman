@@ -45,7 +45,7 @@ class PowerUp extends Actor {
     // Remove the power-up when the player overlaps with it
     this.destroy();
     console.log('PowerUp collected');
-    Engine.audio.spawn(`powerUp`, { loop: true });
+    Engine.gameLoop.data.ghostHunt = 60 * 5; // 60 * 5 frames = 5 seconds
 
     // Set isScared flag to true for all ghosts
     const allGhosts = Engine.gameLoop.actors.filter((actor) => actor.name === 'ghost');
@@ -56,32 +56,27 @@ class PowerUp extends Actor {
         return;
       }
 
-      ghost.isScared = true;
-      stopAndHideFlipbook(ghost, 0);
-      playAndShowFlipbook(ghost, 1, 'ScaredGhostMoving');
+      if (Engine.gameLoop.ghostHunt > 0) {
+        // Add the logic for scared behavior here
 
-      // Find the 'powerUpTimer' and remove it if it exists
-      const existingTimer = Engine.gameLoop.findTimer('powerUpTimer');
-      if (existingTimer) {
-        Engine.gameLoop.deleteTimer(existingTimer);
+        Engine.audio.spawn(`powerUp`, { loop: true });
+        ghost.isScared = true;
+        stopAndHideFlipbook(ghost, 0);
+        playAndShowFlipbook(ghost, 1, 'ScaredGhostMoving');
+
+      } else {
+        // Ghosts are not scared (normal behavior)
+
+        Engine.audio.tracks['powerUp'].instances.forEach((sfx) => sfx.stop());
+
+        ghost.isScared = false;
+        console.log('Ghost is back to normal');
+        stopAndHideFlipbook(ghost, 1);
+        playAndShowFlipbook(ghost, 0, 'GhostMoving');
       }
 
-      console.log(existingTimer);
 
-      // After 5 seconds, set isScared flag back to false for the ghost
-      ghost.addTimer({
-        name: 'powerUpTimer',
-        duration: 120 * 5, // 5 seconds
-        onComplete: (e) => {
-          Engine.audio.tracks['powerUp'].instances.forEach((sfx) => sfx.stop());
-
-          ghost.isScared = false;
-          console.log('Ghost is back to normal');
-          stopAndHideFlipbook(ghost, 1);
-          playAndShowFlipbook(ghost, 0, 'GhostMoving');
-        },
-      });
-    });
+    })
   }
 }
 

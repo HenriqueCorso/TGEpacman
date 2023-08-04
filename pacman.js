@@ -6,6 +6,9 @@ import * as TGE from './engine/engine.js';
 import { Flipbook } from './engine/flipbook.js';
 import { stopAndHideFlipbook, playAndShowFlipbook } from './pacman-utils.js';
 
+Engine.gameLoop.data.ghostHunt = 0; // Initialize the ghostHunt counter to 0
+
+
 class Pacman extends Player {
   constructor() {
     super({
@@ -19,6 +22,7 @@ class Pacman extends Player {
     });
 
     this.canMove = true; // Add a flag to indicate if the player can move
+
   }
 
   init = async () => {
@@ -138,10 +142,15 @@ class Pacman extends Player {
     }
   }
 
-
   tick() {
     super.tick();
     this.handlePlayerMovement();
+
+    if (Engine.gameLoop.data.ghostHunt > 0) {
+      Engine.gameLoop.data.ghostHunt--;
+    }
+
+
   }
 }
 

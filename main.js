@@ -9,6 +9,7 @@ import { Pellet } from './pellet.js';
 import { PowerUp } from './powerUp.js';
 import { InitAudio } from './engine/audio.js';
 import { Picture } from './engine/picture.js';
+import { waitClick } from './engine/utils.js';
 
 const Engine = TGE.Engine;
 
@@ -60,13 +61,9 @@ const playScoreSound = async (score) => {
 
   // Check if a valid sound name was determined and play the sound
   if (soundName) {
-    if (soundName !== 'siren5') {
-      // Play the looped sound for the current score range (except for the last range)
-      currentLoopSound = await Engine.audio.spawn(soundName, { loop: true });
-    } else {
-      // Play the siren sound for the last milestone
-      await Engine.audio.spawn(soundName, { loop: true });
-    }
+    // Play the looped sound for the current score range (except for the last range)
+    currentLoopSound = await Engine.audio.spawn(soundName, { loop: true });
+
   }
 };
 
@@ -215,6 +212,11 @@ const main = async () => {
   playScoreSound();
 
   await loadMap('level1.hjson'); // Load the initial map
+
+
+  await waitClick('game');             // id or htmlElement reference (which needs to be clicked)
+
+
 
   Engine.gameLoop.tickRate = 120;
   Engine.start(tick);

@@ -12,19 +12,18 @@ import { Picture } from './engine/picture.js';
 
 const Engine = TGE.Engine;
 
+let currentLoopSound = null; // Keep track of the currently playing looped sound
+
 const tick = () => {
   updateCamera();
-
   updateScoreSound();
-
-
 }
 
 const updateScoreSound = () => {
   // Get the current score from Engine's data object
   const currentScore = Engine.data.score;
 
-  // Get the last played score milestone from Engine's data object 
+  // Get the last played score milestone from Engine's data object
   let lastPlayedMilestone = Engine.data.lastPlayedMilestone || 0;
 
   // Check if the current score has reached a new milestone (multiple of 1000)
@@ -37,31 +36,40 @@ const updateScoreSound = () => {
   }
 }
 
-
 const playScoreSound = async (score) => {
+  // Check if there's a currently playing looped sound, and stop it if it exists
+  if (currentLoopSound) {
+    currentLoopSound.stop();
+    currentLoopSound = null;
+  }
+
   let soundName;
 
   // Determine the sound to play based on the milestone reached
   if (score >= 1000 && score < 2000) {
     soundName = 'siren1';
   } else if (score >= 2000 && score < 3000) {
-    Engine.audio.tracks.siren1.instances.forEach(sfx => sfx.stop());
-
     soundName = 'siren2';
   } else if (score >= 3000 && score < 4000) {
-    Engine.audio.tracks.siren2.instances.forEach(sfx => sfx.stop());
-
     soundName = 'siren3';
   } else if (score >= 4000 && score < 5000) {
-    Engine.audio.tracks.siren3.instances.forEach(sfx => sfx.stop());
-
     soundName = 'siren4';
+  } else if (score >= 5000) {
+    soundName = 'siren5';
   }
+
   // Check if a valid sound name was determined and play the sound
   if (soundName) {
-    const sirens = await Engine.audio.spawn(soundName, { loop: true })
+    if (soundName !== 'siren5') {
+      // Play the looped sound for the current score range (except for the last range)
+      currentLoopSound = await Engine.audio.spawn(soundName, { loop: true });
+    } else {
+      // Play the siren sound for the last milestone
+      await Engine.audio.spawn(soundName, { loop: true });
+    }
   }
 };
+
 
 const updateCamera = () => {
   const player = Engine.gameLoop.findActorByName('pacman');
@@ -158,7 +166,6 @@ export const loadMap = async (mapPath) => {
   await createPacman();
   await createGhosts(mapPath); // Pass the map name to createGhosts
 
-  Engine.gameLoop.forActors(a => a.offset = V2(25, 25));
   Engine.gameLoop.add('custom', { update, zIndex: 2 });
 
 

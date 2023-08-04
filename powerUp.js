@@ -40,11 +40,12 @@ class PowerUp extends Actor {
     this.events.add('beginoverlap', (e) => this.onPowerUpCollected());
   }
 
+
   onPowerUpCollected() {
     // Remove the power-up when the player overlaps with it
     this.destroy();
     console.log('PowerUp collected');
-    Engine.audio.spawn(`powerUp`, true);
+    Engine.audio.spawn(`powerUp`, { loop: true });
 
     // Set isScared flag to true for all ghosts
     const allGhosts = Engine.gameLoop.actors.filter((actor) => actor.name === 'ghost');
@@ -59,10 +60,21 @@ class PowerUp extends Actor {
       stopAndHideFlipbook(ghost, 0);
       playAndShowFlipbook(ghost, 1, 'ScaredGhostMoving');
 
+      // Find the 'powerUpTimer' and remove it if it exists
+      const existingTimer = Engine.gameLoop.findTimer('powerUpTimer');
+      if (existingTimer) {
+        Engine.gameLoop.deleteTimer(existingTimer);
+      }
+
+      console.log(existingTimer);
+
       // After 5 seconds, set isScared flag back to false for the ghost
       ghost.addTimer({
+        name: 'powerUpTimer',
         duration: 120 * 5, // 5 seconds
         onComplete: (e) => {
+          Engine.audio.tracks['powerUp'].instances.forEach((sfx) => sfx.stop());
+
           ghost.isScared = false;
           console.log('Ghost is back to normal');
           stopAndHideFlipbook(ghost, 1);

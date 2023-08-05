@@ -10,8 +10,7 @@ import { ManagedArray } from "./managedArray.js";
 import { Weapon } from "./weapon.js";
 import { ActorMovement } from "./actorMovement.js";
 import { GameLoop } from "./gameLoop.js";
-import { V2 } from "./types.js";
-import { addPropertyListener } from "./utils.js";
+import { addPropertyListener, sealProp } from "./utils.js";
 import { defaultFlipbookPlayer } from "./flipbookPlayer.js";
 
 const { Vector2:Vec2, Rect } = Types;
@@ -84,7 +83,7 @@ class Actor extends Root {
 		this.renderHints = Object.assign(this.renderHints, { showBoundingBox:false, fixedScale:false, fixedRotation:false, mirrorY:false, mirrorX:false });
 
 		/**
-		 * @member {Object} 
+		 * Flags
 		 * 
 		*/
 		Object.assign(this.flags, { isStatic:false, isDestroyed:false, isFlipbookEnabled:false, hasEdges:true, mouseEnabled:false, boundingBoxEnabled:false, optimizeCollisionChecks:true });
@@ -97,7 +96,15 @@ class Actor extends Root {
 				delete this.flipbooks;
 				delete this._renderAnimations;				
 			}
-		})
+		});
+
+		addPropertyListener(this.flags, 'optimizeCollisionChecks', e => {
+			if (e == true) {
+				this.optimizedColliders = [];
+			} else {
+				delete this.optimizedColliders;
+			}			
+		});
 
 		/**
 		 * @member {number}
@@ -119,10 +126,10 @@ class Actor extends Root {
 		 *  @memberof Actor
 		 *  @type {Actor#movement}
 		 */
-		AE.sealProp(this, 'movement', new ActorMovement(this));								// movement object (TO-DO: might need a Class?)
-		AE.sealProp(this, 'data', ('data' in o) ? o.data : {});								// Container for custom user data
-		AE.sealProp(this, 'surface');
-		AE.sealProp(this, 'counters', {});
+		sealProp(this, 'movement', new ActorMovement(this));								// movement object (TO-DO: might need a Class?)
+		sealProp(this, 'data', ('data' in o) ? o.data : {});								// Container for custom user data
+		sealProp(this, 'surface');
+		sealProp(this, 'counters', {});
 
 		if ('surface' in o) this.surface = o.surface;
 			else
@@ -395,9 +402,11 @@ class Actor extends Root {
 
 		this.events.fire('tick');
 
-		if (this.flags.optimizeCollisionChecks && this.colliders && this.colliders.objects.length > 0 && this.owner.engine.edges.isPointInside(this.renderPosition)) {			
-			this.optimizedColliders = this.colliders.objects;
-		} else this.optimizedColliders = [];				
+		if (this.colliders) {			
+			if (this.flags.optimizeCollisionChecks) {
+				if (this.owner.engine.viewport.isPointInside(this.renderPosition)) this.optimizedColliders = this.colliders.objects;			
+			} 
+		}
 
 		for (const [k, v] of Object.entries(this.counters)) if (v > 0) this.counters[k]--;
 		

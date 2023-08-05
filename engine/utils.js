@@ -368,13 +368,17 @@ const copyProps = (target, source, properties) => {
  * @param {string=} o.text Optional. Textcontent for the created element
  * @param {string=} o.id Optional. ID for the created element
  * @param {string=} o.class Optional. Space separated list of CSS class names to be added in the created element
- * @param {string=} o.type Optional. Type of the created HTML Element. Defaults to "div".
+ * @param {string=} o.type DEPRECATED. Optional. Type of the created HTML Element. Defaults to "div".
+ * @param {boolean} o.tagName Optional. Override automatic tag name assignment for <input> types (allows defining <button> tag) NEW!!!
  * 	NOTE! If the type is any of InputTypes constants, the type of the element is set to "input" and the type field becomes the value of <input type=""> 
  * @returns {HTMLElement}
  */
 const addElem = (o) => {		
 	let kind = ('type' in o) ? o.type : 'div';	
-	if (!('override' in o) && InputTypes.includes(kind)) kind = 'input';													// check if the given "type" is any of InputTypes constants
+	if ('tagName' in o) {
+		kind = o.tagName;
+	} else
+		if (InputTypes.includes(kind)) kind = 'input';													// check if the given "type" is any of InputTypes constants
 	
     const el = document.createElement(kind);
 
@@ -385,6 +389,13 @@ const addElem = (o) => {
     if ('id' in o)    el.id = o.id;
 
 	for (const [k, v] of Object.entries(o)) {
+		if (k == 'tagName') {
+			continue;
+		} else
+		if (k.substring(0, 2) == 'on') {
+			const evt = k.slice(2);
+			addEvent(el, evt, v);
+		} else
 		if (!['text', 'class', 'id', 'parent', 'type'].includes(k)) {
 			el.setAttribute(k, v);
 		}
@@ -471,6 +482,107 @@ const addEvent = (elem, evnt, func, params = false) => {
 	throw 'Failed to set event listener';
 }
 
+const isObject 	 = (o) => { return o === Object(o); }
+const isBoolean  = (o) => { return typeof o === 'boolean'; }
+const isFunction = (o) => { return typeof o == 'function'; }
+const isNumeric  = (o) => { return !isNaN(parseFloat(o)) && isFinite(o); }	// regardless of type...
+
+const sealProp = (obj, prop, /* optional */value) => {
+	if (value !== undefined) Object.defineProperty(obj, prop, { value, writable:true, configurable:false });
+		else Object.defineProperty(obj, prop, { writable:true, configurable:false });
+}
+
+/**
+ * 
+ * @param {string} url 
+ * @param {object} settings 
+ * @param {string} settings.fileType
+ * @param {boolean} settings.verbose
+ * @param {function} settings.callback
+ * @param {document} settings.HTMLDocument Optional. Reference to document where the dynamic download code is injected. If not provided, uses the current "document"
+ * @returns 
+ */
+const require = (url, settings = {}) => { 
+	var fileType = ('fileType' in settings) ? settings.fileType : 'auto'; 
+	var verbose  = ('verbose' in settings) ? settings.verbose : true; 
+	var callback = ('callback' in settings) ? settings.callback : null; 
+	var doc      = ('document' in settings) ? settings.document : document;
+	
+    let file = url.split('/').pop().split('?').shift();
+	if (fileType == 'auto') fileType = file.split('.').pop();
+    let addr = (fileType == 'js') ? 'src' : 'href';
+
+// check if requested URL is already in <head>, if not, load it:
+    let head = doc.head;
+    for (var i = 0; i < head.children.length; i++) { 
+        var tag = head.children[i];        
+        if (addr in tag && tag[addr].indexOf(url) != -1) { 
+			if (verbose) console.warn('Skipped file: ' + url); 
+			if (callback) callback(url, null);
+			return false; 
+		}         
+    }
+
+    switch (fileType) { 
+        case 'css':             
+            var tag   = doc.createElement('link');
+            tag.rel   = 'stylesheet';
+            tag.type  = 'text/css';
+            tag.href  = url;
+			tag.crossOrigin = 'anonymous';
+        break;
+        case 'js':            
+            var tag = doc.createElement('script');
+			if (settings.module) tag.type = 'module';
+            tag.src  = url;
+        break;
+		default:
+			console.warn('Filetype not detected:', url);
+    }
+    if (verbose)  console.log('Loading: ' + url);
+	if (callback) tag.onload = function() { callback(url, tag); }
+    head.appendChild(tag);
+	
+	return true;
+}
+
+const getPos = (elem, includeScrolling) => {
+	var cr = elem.getBoundingClientRect() || { left:0, top:0, right:0, bottom:0 }
+	if (includeScrolling) { 
+		const x = document.documentElement.scrollLeft;
+		const y = document.documentElement.scrollTop;
+		var  cr = { left:cr.left+x, top:cr.top+y, right:cr.right+x, bottom:cr.bottom+y };
+	}
+	return cr;
+}
+
+const style = (elem, properties, compute) => {	
+	if (properties == undefined) return;
+	var elem = ID(elem);
+	var propList = properties.split(';');
+	var property, value, obj;
+	for (var i = 0; i < propList.length; i++) {
+		/*
+		   obj      = propList[i].split(':'); 
+		   this isn't sufficient when we have --> background-image:url('http: <-- there is ANOTHER colon which will split the string in 3 parts!
+		   so instead of simple split ':' we split with colon, except when the colon in between open and close parenthesis!
+	    */
+	    obj = propList[i].match(/(?:[^:\(]+|\([^\)]*\))+/g); 
+	   
+	    if (obj != null) {
+		   if (obj.length == 2) {
+			   property = obj[0].trim();
+			   value    = obj[1].trim();
+			   elem.style[property] = value;
+			   if (compute) { var n = getComputedStyle(elem)[property]; }
+		   } else if (obj.length == 1) {
+			   property = obj[0].trim();
+			   elem.style[property] = '';
+		   }
+	    }
+	}
+}   
+
 export { 
 	loadedJsonMap,
 	preloadImages, 
@@ -500,13 +612,20 @@ export {
 	arraysEqual,
 	remove,
 	
+	Mixin,
 	addElem,
 	addEvent,
 	ID,
 	waitClick, 
-
-	Mixin,
+	isBoolean,
+	isFunction,
+	isObject,
+	isNumeric,
+	require,
 	addMethods,
 	addPropertyListener,
-	copyProps
+	copyProps,
+	sealProp,
+	getPos,
+	style
 }

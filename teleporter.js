@@ -38,8 +38,8 @@ export class Teleporter extends Actor {
   onCollision(actor) {
     console.log('Teleport')
 
-    if (actor.name == 'pacman' || actor.name == 'ghost') {
-      console.log(actor)
+    Engine.gameLoop.forActors(actor => {
+      if (actor.name != 'pacman') return;
 
       // Get the width and height of the map
       const mapWidth = Engine.gameLoop.data.map.width;
@@ -59,6 +59,6 @@ export class Teleporter extends Actor {
 
       // Set the position of the actor to the teleporter position
       actor.position = teleporterPosition;
-    }
+    });
   }
 }

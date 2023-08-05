@@ -170,17 +170,6 @@ class Pacman extends Player {
     this.handleGhostNormal();
     this.handlePlayerMovement();
 
-    // Check if Pacman's x-coordinate goes beyond the screen boundaries
-    if (this) {
-      if (this.position.x < 0) {
-        // Wrap to the right side of the screen
-        this.position.x = Engine.renderingSurface.canvas.width;
-      } else if (this.position.x >= Engine.renderingSurface.canvas.width) {
-        // Wrap to the left side of the screen
-        this.position.x = 0;
-      }
-    }
-
   }
 }
 

@@ -35,26 +35,25 @@ export class Teleporter extends Actor {
   }
 
 
-  onCollision(actor) {
+  onCollision() {
     console.log('Teleport')
 
     Engine.gameLoop.forActors(actor => {
       if (actor.name != 'pacman') return;
 
-      // Get the width and height of the map
       const mapWidth = Engine.gameLoop.data.map.width;
-      const mapHeight = Engine.gameLoop.data.map.height;
 
       // Get the position of the opposite teleporter on the map
-      let teleporterPosition = this.position;
+      let teleporterPosition = this.position.clone();
 
-      // If the teleporter is in the left half of the map, teleport to the right half
-      if (this.position.x < mapWidth / 2) {
-        teleporterPosition = V2(this.position.x + mapWidth / 2, this.position.y);
-      }
-      // If the teleporter is in the right half of the map, teleport to the left half
-      else {
-        teleporterPosition = V2(this.position.x - mapWidth / 2, this.position.y);
+      // Determine the teleportation direction based on the player's rotation
+
+      if (actor.rotation == 0) {
+        // If the player is moving to the right, teleport to the left side of the map
+        teleporterPosition.x = (teleporterPosition.x - mapWidth / 2) % mapWidth;
+      } else if (actor.rotation == Math.PI) {
+        // If the player is moving to the left, teleport to the right side of the map
+        teleporterPosition.x = (teleporterPosition.x + mapWidth / 2) % mapWidth;
       }
 
       // Set the position of the actor to the teleporter position

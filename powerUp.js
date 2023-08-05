@@ -43,9 +43,11 @@ class PowerUp extends Actor {
 
   onPowerUpCollected() {
     // Remove the power-up when the player overlaps with it
+    Engine.audio.tracks['powerUp'].instances.forEach((sfx) => sfx.stop());
+
     this.destroy();
     console.log('PowerUp collected');
-    Engine.gameLoop.data.ghostHunt = 60 * 5; // 60 * 5 frames = 5 seconds
+    Engine.gameLoop.data.ghostHunt = 120 * 5; // 60 * 5 frames = 5 seconds
 
     // Set isScared flag to true for all ghosts
     const allGhosts = Engine.gameLoop.actors.filter((actor) => actor.name === 'ghost');
@@ -56,7 +58,7 @@ class PowerUp extends Actor {
         return;
       }
 
-      if (Engine.gameLoop.ghostHunt > 0) {
+      if (Engine.gameLoop.data.ghostHunt > 0) {
         // Add the logic for scared behavior here
 
         Engine.audio.spawn(`powerUp`, { loop: true });
@@ -64,18 +66,7 @@ class PowerUp extends Actor {
         stopAndHideFlipbook(ghost, 0);
         playAndShowFlipbook(ghost, 1, 'ScaredGhostMoving');
 
-      } else {
-        // Ghosts are not scared (normal behavior)
-
-        Engine.audio.tracks['powerUp'].instances.forEach((sfx) => sfx.stop());
-
-        ghost.isScared = false;
-        console.log('Ghost is back to normal');
-        stopAndHideFlipbook(ghost, 1);
-        playAndShowFlipbook(ghost, 0, 'GhostMoving');
       }
-
-
     })
   }
 }

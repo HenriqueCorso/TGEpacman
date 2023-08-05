@@ -142,16 +142,49 @@ class Pacman extends Player {
     }
   }
 
+  handleGhostNormal() {
+
+    if (Engine.gameLoop.data.ghostHunt > 0) Engine.gameLoop.data.ghostHunt--;
+
+    if (Engine.gameLoop.data.ghostHunt == 1) {
+      Engine.audio.tracks['powerUp'].instances.forEach((sfx) => sfx.stop());
+
+      // Ghost hunt mode ends, so do something exactly once
+
+      Engine.gameLoop.forActors(actor => {
+        if (actor.name != 'ghost') return;
+
+
+        actor.isScared = false;
+        console.log('Ghost is back to normal');
+        stopAndHideFlipbook(actor, 1);
+        playAndShowFlipbook(actor, 0, 'GhostMoving');
+      });
+    }
+  }
+
+
   tick() {
     super.tick();
+
+    this.handleGhostNormal();
     this.handlePlayerMovement();
 
-    if (Engine.gameLoop.data.ghostHunt > 0) {
-      Engine.gameLoop.data.ghostHunt--;
+    // Check if Pacman's x-coordinate goes beyond the screen boundaries
+    if (this) {
+      if (this.position.x < 0) {
+        // Wrap to the right side of the screen
+        this.position.x = Engine.renderingSurface.canvas.width;
+      } else if (this.position.x >= Engine.renderingSurface.canvas.width) {
+        // Wrap to the left side of the screen
+        this.position.x = 0;
+      }
     }
-
 
   }
 }
+
+
+
 
 export { Pacman };

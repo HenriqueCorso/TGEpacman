@@ -10,6 +10,7 @@ import { PowerUp } from './powerUp.js';
 import { InitAudio } from './engine/audio.js';
 import { Picture } from './engine/picture.js';
 import { waitClick } from './engine/utils.js';
+import { Teleporter } from './teleporter.js';
 
 const Engine = TGE.Engine;
 
@@ -68,7 +69,6 @@ const playScoreSound = async (score) => {
   }
 };
 
-
 const updateCamera = () => {
   const player = Engine.gameLoop.findActorByName('pacman');
   if (player) {
@@ -102,15 +102,7 @@ const createGhosts = async (mapName) => {
     await ghost3.init('img/ghostMoving3.png');
 
   } else if (mapName == 'level3.hjson') {
-    const ghost = new Ghost(V2(450, 400));
-    const ghost2 = new Ghost(V2(450, 400));
-    const ghost3 = new Ghost(V2(450, 400));
-    const ghost4 = new Ghost(V2(450, 400));
 
-    await ghost.init('img/ghostMoving.png');
-    await ghost2.init('img/ghostMoving2.png');
-    await ghost3.init('img/ghostMoving3.png');
-    await ghost4.init('img/ghostMoving4.png');
   }
 };
 
@@ -139,9 +131,12 @@ function createMap() {
         case 2: // PowerUp 
           actor = new PowerUp(position);
           break;
+        case 3: // Wrap-around tile
+          actor = new Teleporter(position); // Create a new Teleporter instance
+          break;
       }
 
-      actor.flags.optimizeCollisionCHecks = false;
+      actor.flags.optimizeCollisionChecks = false;
       Engine.addActor(actor); // Add the actor to the engine
 
     }
@@ -166,9 +161,7 @@ export const loadMap = async (mapPath) => {
 
   Engine.gameLoop.add('custom', { update, zIndex: 2 });
 
-
 }
-
 
 // Initialize the score and lives in the Engine's data object
 Engine.data.score = 0;
@@ -201,7 +194,6 @@ const update = () => {
   }
 }
 
-
 const main = async () => {
   await Engine.setup('./settings.hjson');
 
@@ -210,20 +202,13 @@ const main = async () => {
   await audio.addBunch(data);
   const start = await audio.spawn('start', true);
 
-  playScoreSound();
-
-  await loadMap('level1.hjson'); // Load the initial map
-
+  await loadMap('level3.hjson'); // Load the initial map
 
   await waitClick('game');             // id or htmlElement reference (which needs to be clicked)
-
-
 
   Engine.gameLoop.tickRate = 120;
   Engine.start(tick);
 
-
 };
-
 
 Engine.init(main);

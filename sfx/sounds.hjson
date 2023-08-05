@@ -22,7 +22,7 @@
      {
         name : powerUp
         url  : sfx/power_pellet.wav
-        volume : 0.5
+        volume : 0.2
     }
     {
         name : eatGhost
@@ -49,5 +49,5 @@
         url  : sfx/siren_4.wav
         volume : 1
     }
-  
+ 
 ]

@@ -30,7 +30,7 @@ export class Teleporter extends Actor {
     });
   }
   setupColliders() {
-    const circleTeleporter = new Circle(V2(0, 0), 30);
+    const circleTeleporter = new Circle(V2(0, 0), 50);
     this.colliders.add(circleTeleporter);
   }
 
@@ -39,10 +39,10 @@ export class Teleporter extends Actor {
     console.log('Teleport')
 
     Engine.gameLoop.forActors(actor => {
-      if (actor.name != 'pacman') return;
+      if (actor.name != 'pacman' && actor.name != 'ghost') return;
 
-      const mapWidth = Engine.gameLoop.data.map.width;
-
+      const mapWidth = Engine.gameLoop.data.map.width * Engine.gameLoop.data.tileSize;
+      console.log(mapWidth)
       // Get the position of the opposite teleporter on the map
       let teleporterPosition = this.position.clone();
 
@@ -50,14 +50,18 @@ export class Teleporter extends Actor {
 
       if (actor.rotation == 0) {
         // If the player is moving to the right, teleport to the left side of the map
-        teleporterPosition.x = (teleporterPosition.x - mapWidth / 2) % mapWidth;
-      } else if (actor.rotation == Math.PI) {
+        teleporterPosition.x = (teleporterPosition.x - mapWidth + 100)
+      } else {
         // If the player is moving to the left, teleport to the right side of the map
-        teleporterPosition.x = (teleporterPosition.x + mapWidth / 2) % mapWidth;
+        teleporterPosition.x = (teleporterPosition.x + mapWidth - 100)
+
+        console.log(teleporterPosition)
       }
 
       // Set the position of the actor to the teleporter position
       actor.position = teleporterPosition;
+
+      actor.position.x = Math.floor(actor.position.x);
     });
   }
 }

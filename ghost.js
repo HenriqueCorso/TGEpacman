@@ -20,6 +20,7 @@ class Ghost extends Enemy {
       name: 'ghost',
       hasColliders: true,
       scale: 0.13,
+      rotation: 0,
       position: position,
       zIndex: 1
     });

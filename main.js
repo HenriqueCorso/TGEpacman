@@ -102,7 +102,15 @@ const createGhosts = async (mapName) => {
     await ghost3.init('img/ghostMoving3.png');
 
   } else if (mapName == 'level3.hjson') {
+    const ghost = new Ghost(V2(450, 400));
+    const ghost2 = new Ghost(V2(450, 400));
+    const ghost3 = new Ghost(V2(450, 400));
+    const ghost4 = new Ghost(V2(450, 400));
 
+    await ghost.init('img/ghostMoving.png');
+    await ghost2.init('img/ghostMoving2.png');
+    await ghost3.init('img/ghostMoving3.png');
+    await ghost4.init('img/ghostMoving4.png');
   }
 };
 
@@ -132,7 +140,7 @@ function createMap() {
           actor = new PowerUp(position);
           break;
         case 3: // Wrap-around tile
-          actor = new Teleporter(position); // Create a new Teleporter instance
+          actor = new Teleporter(position);
           break;
       }
 
@@ -171,8 +179,6 @@ const icon = await Picture.LoadFromFile('img/pacmanIcon.png');
 
 
 const update = () => {
-  const player = Engine.gameLoop.findActorByName('pacman');
-
 
   let score = Engine.data.score
   let lives = Engine.data.lives
@@ -183,7 +189,6 @@ const update = () => {
     color: 'white',
     font: '20px led',
   });
-
 
   // Draw pacman icons for lives
   const iconSize = 20; // Adjust the size of the pacman icon 

@@ -49,5 +49,14 @@
         url  : sfx/siren_4.wav
         volume : 1
     }
- 
+      {
+        name : siren5
+        url  : sfx/siren_5.wav
+        volume : 1
+    }
+         {
+        name : extraLife
+        url  : sfx/extend.wav
+        volume : 1
+    }
 ]

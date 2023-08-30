@@ -52,12 +52,20 @@ const playScoreSound = async (score) => {
   if (score >= 1000 && score < 2000) {
     soundName = 'siren1';
   } else if (score >= 2000 && score < 3000) {
+    Engine.audio.spawn(`extraLife`, true);
+    Engine.data.lives++
     soundName = 'siren2';
   } else if (score >= 3000 && score < 4000) {
     soundName = 'siren3';
   } else if (score >= 4000 && score < 5000) {
+    Engine.audio.spawn(`extraLife`, true);
+    Engine.data.lives++
     soundName = 'siren4';
-  } else if (score >= 5000) {
+  } else if (score >= 5000 && score < 6000) {
+    soundName = 'siren5';
+  } else if (score >= 6000) {
+    Engine.audio.spawn(`extraLife`, true);
+    Engine.data.lives++
     soundName = 'siren5';
   }
 

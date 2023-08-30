@@ -68,6 +68,8 @@ class Pellet extends Actor {
       loadMap('level2.hjson');
     } else if (currentLevel === 'level2.hjson') {
       loadMap('level3.hjson');
+    } else if (currentLevel === 'level3.hjson') {
+      loadMap('level4.hjson');
     } else {
       console.log('All levels completed!');
       // Implement any actions for completing all levels here, such as showing a game completed screen.

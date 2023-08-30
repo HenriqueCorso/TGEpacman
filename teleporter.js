@@ -39,7 +39,7 @@ export class Teleporter extends Actor {
     console.log('Teleport')
 
     Engine.gameLoop.forActors(actor => {
-      if (actor.name != 'pacman' && actor.name != 'ghost') return;
+      if (actor.name != 'pacman') return;
 
       const mapWidth = Engine.gameLoop.data.map.width * Engine.gameLoop.data.tileSize;
       console.log(mapWidth)

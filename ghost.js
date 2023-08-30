@@ -30,6 +30,7 @@ class Ghost extends Enemy {
     this.initialSpeed = 1; // Initial movement speed of the ghost
     this.currentSpeed = this.initialSpeed; // Current movement speed of the ghost
 
+
   }
 
   init = async (flipbookName) => {
